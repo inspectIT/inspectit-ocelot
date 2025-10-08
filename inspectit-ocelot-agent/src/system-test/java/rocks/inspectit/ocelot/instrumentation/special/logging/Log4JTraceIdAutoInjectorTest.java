@@ -10,7 +10,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
-import rocks.inspectit.ocelot.logging.Log4JLoggingRecorder;
+import rocks.inspectit.ocelot.utils.logging.Log4JLoggingRecorder;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +22,7 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     private static final Tracer tracer = GlobalOpenTelemetry.getTracer("rocks.inspectit.ocelot.test", "0.0.1");
 
     @BeforeAll
-    public static void waitForInstrumentation() {
+    public static void waitForClassInstrumentation() {
         TestUtils.waitForClassInstrumentations(Category.class);
     }
 

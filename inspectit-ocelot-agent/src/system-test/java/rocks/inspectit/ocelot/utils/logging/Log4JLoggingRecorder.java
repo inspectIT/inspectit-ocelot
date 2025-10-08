@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.logging;
+package rocks.inspectit.ocelot.utils.logging;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
@@ -16,9 +16,7 @@ public class Log4JLoggingRecorder extends AppenderSkeleton {
     }
 
     @Override
-    public void close() {
-
-    }
+    public void close() {}
 
     @Override
     public boolean requiresLayout() {

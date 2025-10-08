@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
-import io.opencensus.tags.InternalUtils;
-import io.opencensus.tags.Tag;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import org.apache.commons.collections.Bag;
 
 import java.util.Iterator;
 import java.util.concurrent.Callable;
@@ -44,41 +43,37 @@ public final class HelperClasses {
         }
     }
 
-    public static Runnable getRunnableAsLambda(AtomicReference<Iterator<Tag>> refTags) {
-        return () -> {
-            refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
-        };
+    public static Runnable getRunnableAsLambda(AtomicReference<Baggage> refBagage) {
+        return () -> refBagage.set(Baggage.current());
     }
 
-    public static Runnable getRunnableAsAnonymous(AtomicReference<Iterator<Tag>> refTags) {
+    public static Runnable getRunnableAsAnonymous(AtomicReference<Baggage> refBaggage) {
         return new Runnable() {
             @Override
             public void run() {
-                refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
+                refBaggage.set(Baggage.current());
             }
         };
     }
 
-    public static Runnable getRunnableAsNamed(AtomicReference<Iterator<Tag>> refTags) {
-        return new TestRunnable(unused -> {
-            refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
-        });
+    public static Runnable getRunnableAsNamed(AtomicReference<Baggage> refBaggage) {
+        return new TestRunnable(unused -> refBaggage.set(Baggage.current()));
     }
 
-    public static Callable<Iterator<Tag>> getCallableAsLambda() {
-        return () -> InternalUtils.getTags(Tags.getTagger().getCurrentTagContext());
+    public static Callable<Baggage> getCallableAsLambda() {
+        return () -> Baggage.current();
     }
 
-    public static Callable<Iterator<Tag>> getCallableAsAnonymous() {
-        return new Callable<Iterator<Tag>>() {
+    public static Callable<Baggage> getCallableAsAnonymous() {
+        return new Callable<Baggage>() {
             @Override
-            public Iterator<Tag> call() throws Exception {
-                return InternalUtils.getTags(Tags.getTagger().getCurrentTagContext());
+            public Baggage call(){
+                return Baggage.current();
             }
         };
     }
 
-    public static Callable<Iterator<Tag>> getCallableAsNamed() {
-        return new TestCallable<Iterator<Tag>>((unused) -> InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
+    public static Callable<Baggage> getCallableAsNamed() {
+        return new TestCallable<Baggage>((unused) -> Baggage.current());
     }
 }

@@ -1,10 +1,12 @@
 package rocks.inspectit.ocelot.instrumentation.http;
 
-import io.opencensus.stats.AggregationData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.ServletException;
@@ -20,11 +22,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpInMetricTest {
+public class HttpInMetricTest extends InstrumentationSysTestBase {
 
     private Server server;
 
@@ -65,20 +68,18 @@ public class HttpInMetricTest {
             fireRequest("http://localhost:" + server.getURI().getPort() + "/servletapi");
             server.stop();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("http_path", "/servletapi");
+            attributes.put("http_status", "200");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("http_path", "/servletapi");
-            tags.put("http_status", "200");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/in/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_in_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
-
     }
-
 }

@@ -1,12 +1,14 @@
 package rocks.inspectit.ocelot.instrumentation.servicegraph;
 
-import io.opencensus.stats.AggregationData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.ServletException;
@@ -27,7 +29,7 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class ServiceInMetricTest {
+public class ServiceInMetricTest extends InstrumentationSysTestBase {
 
     public static final int PORT = 9999;
 
@@ -80,28 +82,23 @@ public class ServiceInMetricTest {
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
                     Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true, 30, TimeUnit.SECONDS);
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("protocol", "http");
-            tags.put("service.name", SERVICE_NAME);
-            tags.put("origin_service", "servlet_origin");
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("protocol", "http");
+            attributes.put("service.name", SERVICE_NAME);
+            attributes.put("origin_service", "servlet_origin");
 
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-
+            await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
                 fireRequest("servlet_origin");
-                TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-                AggregationData.CountData inCount = (AggregationData.CountData) TestUtils.getDataForView("service/in/count", tags);
-                AggregationData.SumDataDouble rtSum = (AggregationData.SumDataDouble) TestUtils.getDataForView("service/in/responsetime/sum", tags);
-
-                assertThat(inCount).isNotNull();
-                assertThat(rtSum).isNotNull();
-
-                assertThat(inCount.getCount()).isGreaterThan(0);
-                assertThat(rtSum.getSum()).isGreaterThan(0);
+                assertThat(MetricTestUtils.getDataForHistogramView("service_in_responsetime", attributes))
+                        .isNotNull()
+                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                            assertThat(pointData.getCount()).isEqualTo(1);
+                            assertThat(pointData.getSum()).isGreaterThan(0);
+                        });
             });
+
             server.stop();
         }
-
     }
-
 }

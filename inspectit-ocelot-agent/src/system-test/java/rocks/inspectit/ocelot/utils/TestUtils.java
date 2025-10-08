@@ -183,12 +183,16 @@ public class TestUtils {
         }
     }
 
+    /**
+     * Checks, if we have instrumented classes and there are no classes in the instrumentation-queue left
+     */
     public static void waitForInstrumentationToComplete() {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             assertThat(MetricTestUtils.getInstrumentationClassesCount()).isGreaterThan(0);
             assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
             Thread.sleep(500); // to ensure that new-class-discovery has been executed
             assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
+            Thread.sleep(500);
         });
     }
 

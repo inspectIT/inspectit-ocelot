@@ -1,10 +1,8 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.common.Scope;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
@@ -42,11 +40,10 @@ public class HttpUrlConnectionContextPropagationTest {
 
         TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true,
                 30, TimeUnit.SECONDS);
-
     }
 
     @BeforeEach
-    void setupWiremock() throws Exception {
+    void setupWiremock() {
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
@@ -59,7 +56,7 @@ public class HttpUrlConnectionContextPropagationTest {
     }
 
     @AfterEach
-    void cleanup() throws Exception {
+    void cleanup() {
         dataToPropagate.clear();
         wireMockServer.stop();
     }
@@ -69,7 +66,6 @@ public class HttpUrlConnectionContextPropagationTest {
 
         @BeforeEach
         void setupResponse() {
-
             stubFor(get(urlEqualTo("/test"))
                     .willReturn(aResponse()
                             .withStatus(200)));
@@ -78,9 +74,7 @@ public class HttpUrlConnectionContextPropagationTest {
         @Test
         void propagationViaGetResponseCode() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
-                    .buildScoped()) {
+            try (Scope s = Baggage.builder().put("down_propagated", "myvalue").build().makeCurrent()) {
                 urlConnection.getResponseCode();
             }
 
@@ -91,10 +85,7 @@ public class HttpUrlConnectionContextPropagationTest {
         @Test
         void propagationViaGetInputStream() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
-                    .buildScoped()) {
-
+            try (Scope s = Baggage.builder().put("down_propagated", "myvalue").build().makeCurrent()) {
                 urlConnection.getInputStream();
             }
 
@@ -105,12 +96,8 @@ public class HttpUrlConnectionContextPropagationTest {
         @Test
         void propagationViaConnect() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
-                    .buildScoped()) {
-
+            try (Scope s = Baggage.builder().put("down_propagated", "myvalue").build().makeCurrent()) {
                 urlConnection.connect();
-
             }
 
             urlConnection.getInputStream();
@@ -122,9 +109,7 @@ public class HttpUrlConnectionContextPropagationTest {
         @Test
         void propagationViaGetHeaderField() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
-                    .buildScoped()) {
+            try (Scope s = Baggage.builder().put("down_propagated", "myvalue").build().makeCurrent()) {
 
                 urlConnection.getHeaderField("some-header");
             }
@@ -132,7 +117,6 @@ public class HttpUrlConnectionContextPropagationTest {
             verify(getRequestedFor(urlEqualTo("/test"))
                     .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
-
     }
 
     @Nested
@@ -223,7 +207,5 @@ public class HttpUrlConnectionContextPropagationTest {
             assertThat(myCtx.getData("up_propagated")).isEqualTo(Math.PI);
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
-
     }
-
 }

@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
-import io.opencensus.common.Scope;
-import io.opencensus.tags.Tag;
-import io.opencensus.tags.Tags;
-import io.opencensus.tags.*;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
@@ -20,9 +18,11 @@ import static org.assertj.core.api.Assertions.tuple;
 
 public class ScheduledExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
-    private static final Tagger tagger = Tags.getTagger();
-
     private ScheduledExecutorService executorService;
+
+    private static final String attrKey = "test_key";
+
+    private static final String attrValue = "test_value";
 
     @BeforeAll
     public static void beforeAll() {
@@ -48,54 +48,60 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
 
         @Test
         public void verifyCtxPropagationViaScheduleRunnable_lambda() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
-            Runnable runnable = HelperClasses.getRunnableAsLambda(refTags);
+            Runnable runnable = HelperClasses.getRunnableAsLambda(refBaggage);
 
             ScheduledFuture<?> schedule;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 schedule = executorService.schedule(runnable, 1, TimeUnit.MILLISECONDS);
             }
             schedule.get();
 
-            assertThat(refTags.get()).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(refBaggage.get().asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleRunnable_anonymous() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
-            Runnable runnable = HelperClasses.getRunnableAsAnonymous(refTags);
+            Runnable runnable = HelperClasses.getRunnableAsAnonymous(refBaggage);
             TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture<?> schedule;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 schedule = executorService.schedule(runnable, 1, TimeUnit.MILLISECONDS);
             }
             schedule.get();
 
-            assertThat(refTags.get()).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(refBaggage.get().asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleRunnable_named() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
-            Runnable runnable = HelperClasses.getRunnableAsNamed(refTags);
+            Runnable runnable = HelperClasses.getRunnableAsNamed(refBaggage);
 
             ScheduledFuture<?> schedule;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 schedule = executorService.schedule(runnable, 1, TimeUnit.MILLISECONDS);
             }
             schedule.get();
 
-            assertThat(refTags.get()).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(refBaggage.get().asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
     }
 
@@ -104,51 +110,54 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
 
         @Test
         public void verifyCtxPropagationViaScheduleCallable_lambda() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
+            Callable<Baggage> callable = HelperClasses.getCallableAsLambda();
 
-            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsLambda();
-
-            ScheduledFuture<Iterator<Tag>> future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            ScheduledFuture<Baggage> future;
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
             }
-            Iterator<Tag> result = future.get();
+            Baggage result = future.get();
 
-            assertThat(result).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(result.asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleCallable_anonymous() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-
-            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsAnonymous();
+            Callable<Baggage> callable = HelperClasses.getCallableAsAnonymous();
             TestUtils.waitForClassInstrumentations(callable.getClass());
 
-            ScheduledFuture<Iterator<Tag>> future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            ScheduledFuture<Baggage> future;
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
             }
-            Iterator<Tag> result = future.get();
+            Baggage result = future.get();
 
-            assertThat(result).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(result.asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleCallable_named() throws Exception {
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
+            Callable<Baggage> callable = HelperClasses.getCallableAsNamed();
 
-            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsNamed();
-
-            ScheduledFuture<Iterator<Tag>> future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            ScheduledFuture<Baggage> future;
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
             }
-            Iterator<Tag> result = future.get();
+            Baggage result = future.get();
 
-            assertThat(result).toIterable().hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
+            assertThat(result.asMap()).hasSize(1)
+                    .allSatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo(attrKey);
+                        assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                    });
         }
     }
 
@@ -158,99 +167,105 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         @Test
         public void verifyCtxPropagationViaScheduleFixedDelay_lambda() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = () -> {
-                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                iteratorList.add(iter);
-                interationCount.countDown();
+                Baggage baggage = Baggage.current();
+                baggageList.add(baggage);
+                iterationCount.countDown();
             };
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleFixedDelay_anonymous() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                    iteratorList.add(iter);
-                    interationCount.countDown();
+                    Baggage baggage = Baggage.current();
+                    baggageList.add(baggage);
+                    iterationCount.countDown();
                 }
             };
             TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleFixedDelay_named() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = new TestRunnable(unused -> {
-                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                iteratorList.add(iter);
-                interationCount.countDown();
+                Baggage baggage = Baggage.current();
+                baggageList.add(baggage);
+                iterationCount.countDown();
             });
             TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
     }
 
@@ -260,98 +275,104 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         @Test
         public void verifyCtxPropagationViaScheduleFixedRate_lambda() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = () -> {
-                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                iteratorList.add(iter);
-                interationCount.countDown();
+                Baggage baggage = Baggage.current();
+                baggageList.add(baggage);
+                iterationCount.countDown();
             };
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleFixedRate_anonymous() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                    iteratorList.add(iter);
-                    interationCount.countDown();
+                    Baggage baggage = Baggage.current();
+                    baggageList.add(baggage);
+                    iterationCount.countDown();
                 }
             };
             TestUtils.waitForClassInstrumentations(runnable.getClass()); // wait for anonymous class instrumentation
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
 
         @Test
         public void verifyCtxPropagationViaScheduleFixedRate_named() throws Exception {
             int iterations = 5;
-            TagKey tagKey = TagKey.create("test-tag-key");
-            TagValue tagValue = TagValue.create("test-tag-value");
-            CountDownLatch interationCount = new CountDownLatch(iterations);
+            CountDownLatch iterationCount = new CountDownLatch(iterations);
 
-            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            List<Baggage> baggageList = new CopyOnWriteArrayList<>();
 
             Runnable runnable = new TestRunnable(unused -> {
-                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                iteratorList.add(iter);
-                interationCount.countDown();
+                Baggage baggage = Baggage.current();
+                baggageList.add(baggage);
+                iterationCount.countDown();
             });
 
             ScheduledFuture future;
-            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+            try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
                 future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
             }
 
-            interationCount.await();
+            iterationCount.await();
 
             future.cancel(true);
             executorService.shutdown();
 
-            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator).toIterable().hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue)));
+            assertThat(baggageList).size().isGreaterThanOrEqualTo(iterations);
+            baggageList.forEach(baggage ->
+                    assertThat(baggage.asMap()).hasSize(1)
+                            .allSatisfy((key, valueEntry) -> {
+                                assertThat(key).isEqualTo(attrKey);
+                                assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                            })
+            );
         }
     }
 }

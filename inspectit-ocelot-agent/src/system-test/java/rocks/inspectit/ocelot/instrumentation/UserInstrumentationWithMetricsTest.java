@@ -45,17 +45,10 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                 assertThat(MetricTestUtils.getDataForHistogramView("my_invocation", attributes))
                         .isNotNull()
-                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) ->
-                                assertThat(pointData.getCount()).isEqualTo(7)
-                        )
-        );
-
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(MetricTestUtils.getDataForView("my_invocation", attributes))
-                        .isNotNull()
-                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) ->
-                                assertThat(pointData.getSum()).isEqualTo(7 * 42)
-                        )
+                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                            assertThat(pointData.getCount()).isEqualTo(7);
+                            assertThat(pointData.getSum()).isEqualTo(7 * 42);
+                        })
         );
     }
 
@@ -73,17 +66,10 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                 assertThat(MetricTestUtils.getDataForHistogramView("method_duration", attributes))
                         .isNotNull()
-                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) ->
-                                assertThat(pointData.getCount()).isEqualTo(3)
-                        )
-        );
-
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(MetricTestUtils.getDataForHistogramView("method_duration", attributes))
-                        .isNotNull()
-                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) ->
-                                assertThat(pointData.getSum()).isBetween(3 * 90.0, 3 * 150.0)
-                        )
+                        .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                            assertThat(pointData.getCount()).isEqualTo(3);
+                            assertThat(pointData.getSum()).isBetween(3 * 90.0, 3 * 150.0);
+                        })
         );
     }
 }

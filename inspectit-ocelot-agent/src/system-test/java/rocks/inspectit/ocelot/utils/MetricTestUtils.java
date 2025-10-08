@@ -55,19 +55,6 @@ public class MetricTestUtils {
     }
 
     /**
-     * Checks, if we have instrumented classes and there are no classes in the instrumentation-queue left
-     */
-    public static void waitForInstrumentationToComplete() {
-        await().atMost(20, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
-            assertThat(getInstrumentationQueueSize()).isZero();
-            Thread.sleep(500); // to ensure that new-class-discovery has been executed
-            assertThat(getInstrumentationQueueSize()).isZero();
-            Thread.sleep(500);
-        });
-    }
-
-    /**
      * @return The point data for the gauge view with the provided attributes
      */
     public static PointData getDataForView(String viewName, Map<String, String> attributes) {
