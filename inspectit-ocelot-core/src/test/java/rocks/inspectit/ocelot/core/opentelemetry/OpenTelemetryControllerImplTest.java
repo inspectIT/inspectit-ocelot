@@ -100,11 +100,16 @@ class OpenTelemetryControllerImplTest {
          */
         protected void registerTestTraceExporterServiceAndVerify(boolean expected) {
             int registeredServices = openTelemetryController.registeredTraceExportServices.size();
-            assertThat(openTelemetryController.registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName())).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredTraceExportServices.size()).isEqualTo(registeredServices + (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName());
-            verify(openTelemetryController, times(expected ? 1 : 0)).notifyTracingSettingsChanged();
-            verify(spanExporter, times(1)).registerSpanExporter(testTraceExporterService.getName(), testTraceExporterService.getSpanExporter());
+            assertThat(openTelemetryController.registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName()))
+                    .isEqualTo(expected);
+            assertThat(openTelemetryController.registeredTraceExportServices.size())
+                    .isEqualTo(registeredServices + (expected ? 1 : 0));
+            verify(openTelemetryController, times(1))
+                    .registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName());
+            verify(openTelemetryController, times(expected ? 1 : 0))
+                    .notifyTracingSettingsChanged();
+            verify(spanExporter, times(1))
+                    .registerSpanExporter(testTraceExporterService.getName(), testTraceExporterService.getSpanExporter());
             verifyNoMoreInteractions(openTelemetryController, spanExporter);
             clearInvocations(openTelemetryController, spanExporter);
         }
@@ -116,11 +121,16 @@ class OpenTelemetryControllerImplTest {
          */
         protected void unregisterTestTraceExporterServiceAndVerify(boolean expected) {
             int registeredServices = openTelemetryController.registeredTraceExportServices.size();
-            assertThat(openTelemetryController.unregisterTraceExporterService(testTraceExporterService.getName())).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredTraceExportServices.size()).isEqualTo(registeredServices - (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).unregisterTraceExporterService(testTraceExporterService.getName());
-            verify(openTelemetryController, times(expected ? 1 : 0)).notifyTracingSettingsChanged();
-            verify(spanExporter, times(1)).unregisterSpanExporter(testTraceExporterService.getName());
+            assertThat(openTelemetryController.unregisterTraceExporterService(testTraceExporterService.getName()))
+                    .isEqualTo(expected);
+            assertThat(openTelemetryController.registeredTraceExportServices.size())
+                    .isEqualTo(registeredServices - (expected ? 1 : 0));
+            verify(openTelemetryController, times(1))
+                    .unregisterTraceExporterService(testTraceExporterService.getName());
+            verify(openTelemetryController, times(expected ? 1 : 0))
+                    .notifyTracingSettingsChanged();
+            verify(spanExporter, times(1))
+                    .unregisterSpanExporter(testTraceExporterService.getName());
             verifyNoMoreInteractions(openTelemetryController, spanExporter);
             clearInvocations(openTelemetryController, spanExporter);
         }
@@ -222,13 +232,17 @@ class OpenTelemetryControllerImplTest {
          *
          * @param expected Whether the registration is expected to succeed.
          */
-        private void registerTestMetricExporterServiceAndVerify(boolean expected) {
+        private void registerTestMetricExporterServiceAndVerify(boolean expected, boolean clearInvocations) {
             int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
-            assertThat(openTelemetryController.registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName())).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricReaders.size()).isEqualTo(numRegisteredServices + (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName());
-            verify(openTelemetryController, times(expected ? 1 : 0)).notifyMetricsSettingsChanged();
-            clearInvocations(openTelemetryController);
+            assertThat(openTelemetryController.registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName()))
+                    .isEqualTo(expected);
+            assertThat(openTelemetryController.registeredMetricReaders.size())
+                    .isEqualTo(numRegisteredServices + (expected ? 1 : 0));
+            verify(openTelemetryController, times(expected ? 1 : 0))
+                    .notifyMetricsSettingsChanged();
+            if (clearInvocations) {
+                clearInvocations(openTelemetryController);
+            }
         }
 
         /**
@@ -238,20 +252,22 @@ class OpenTelemetryControllerImplTest {
          */
         private void unregisterTestMetricExporterServiceAndVerify(boolean expected) {
             int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
-            assertThat(openTelemetryController.unregisterMetricExporterService(testMetricsExporterService.getName())).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricReaders.size()).isEqualTo(numRegisteredServices - (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).unregisterMetricExporterService(testMetricsExporterService.getName());
-            verify(openTelemetryController, times(expected ? 1 : 0)).notifyMetricsSettingsChanged();
+            assertThat(openTelemetryController.unregisterMetricExporterService(testMetricsExporterService.getName()))
+                    .isEqualTo(expected);
+            assertThat(openTelemetryController.registeredMetricReaders.size())
+                    .isEqualTo(numRegisteredServices - (expected ? 1 : 0));
+            verify(openTelemetryController, times(expected ? 1 : 0))
+                    .notifyMetricsSettingsChanged();
             clearInvocations(openTelemetryController);
         }
 
         @Test
         void testRegisterMetricsExporterService() {
             // first registration succeeds
-            registerTestMetricExporterServiceAndVerify(true);
+            registerTestMetricExporterServiceAndVerify(true, true);
 
             // second should fail as the service was already registered
-            registerTestMetricExporterServiceAndVerify(false);
+            registerTestMetricExporterServiceAndVerify(false, true);
         }
 
         @Test
@@ -260,7 +276,7 @@ class OpenTelemetryControllerImplTest {
             unregisterTestMetricExporterServiceAndVerify(false);
 
             // register service
-            registerTestMetricExporterServiceAndVerify(true);
+            registerTestMetricExporterServiceAndVerify(true, true);
 
             // unregistration should succeed
             unregisterTestMetricExporterServiceAndVerify(true);
@@ -275,12 +291,10 @@ class OpenTelemetryControllerImplTest {
             SdkTracerProvider tracerProvider = openTelemetryController.getTracerProvider();
 
             // register some service
-            registerTestMetricExporterServiceAndVerify(true);
-            // configure OTEL
-            assertThat(openTelemetryController.configureOpenTelemetry()).isTrue();
+            registerTestMetricExporterServiceAndVerify(true, false);
 
             // verify that meter provider was configured but not tracing
-            verify(openTelemetryController, times(1)).configureMeterProvider();
+            verify(openTelemetryController).configureMeterProvider();
             verify(openTelemetryController, times(0)).configureTracerProvider(any(InspectitConfig.class));
 
             // the meter provider should have changed, but the tracer provider not
