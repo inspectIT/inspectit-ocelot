@@ -19,7 +19,7 @@
       "metrics/metrics",
       "metrics/metric-recorders",
       "metrics/metric-exporters",
-      "metrics/common-tags",
+      "metrics/common-attributes",
       "metrics/custom-metrics",
       "metrics/self-monitoring",
       "metrics/tag-guard"
@@ -72,6 +72,6 @@
       "config-server/status-table-view",
       "config-server/alerting"
     ],
-    "Breaking Changes": ["breaking-changes/Breaking Changes"]
+    "Breaking Changes": ["breaking-changes/breaking-changes"]
   }
 }

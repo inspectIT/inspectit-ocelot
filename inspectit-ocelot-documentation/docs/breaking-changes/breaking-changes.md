@@ -1,5 +1,5 @@
 ---
-id: Breaking Changes
+id: breaking-changes
 title: Breaking Changes
 ---
 
@@ -24,7 +24,7 @@ TODO:
 Since the previous InfluxDB exporter was specifically designed for OpenCensus,
 due to the migration to OpenTelemetry the exporter was fully removed. Please use the other exporters instead.
 
-### Migration Guide
+### Migration Guide for 3.0.0
 
 #### Update metric definitions
 
@@ -487,7 +487,7 @@ inspectit:
 
 As these definitions could be easily forgotten, we changed the default behaviour of data:
 It now does *not* propagate and is *not* used as a tag automatically. The exception hereby
-is (a) if the data is a [common tag](metrics/common-tags.md) or (b) the data is used as a tag in any
+is (a) if the data is a [common tag](metrics/common-attributes.md) or (b) the data is used as a tag in any
 [metric definition](metrics/custom-metrics.md). Common Tags default to JVM_LOCAL down propagation and being a tag.
 When a data_key is also used as a tag in a metric definition, it defaults to being a tag but the propagation is not affected.
 You can still freely override the behaviour by configuring the settings for your data under `inspectit.instrumentation.data`.

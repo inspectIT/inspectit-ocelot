@@ -28,7 +28,7 @@ inspectit:
         views:
           '[method/duration]':
             aggregation: HISTOGRAM
-            tags:
+            attributes:
               method-name: true
 ```
 
@@ -47,7 +47,7 @@ The configuration options given above are only a subset of the available options
 | `unit`            | -                                | *Required*. A textual representation of the unit of the data represented by the metric.                                   |
 | `description`     | Generated based on name and unit | A textual description of the purpose of the metric.                                                                       |
 | `instrument-type` | `GAUGE`                          | Specifies which OpenTelemetry instrument to use for recording value (`COUNTER`, `UP_DOWN_COUNTER`, `GAUGE`, `HISTOGRAM`). |
-| `value-type`      | `DOUBLE`                         | Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).                       |
+| `value-type`      | `LONG`                           | Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).                       |
 | `views`           | -                                | A list of view, which should be exposed. If no view are specified, OpenTelemetry will create default views automatically. |
 
 
@@ -61,18 +61,27 @@ All configuration options for customizing views are given below:
 | `description`            | Generated based on name and aggregation                              | A textual description of the purpose of this view.                                                                                                                                                                                                                                                                            |
 | `aggregation`            | `LAST_VALUE`                                                         | Specifies how the metric data is aggregated in this view. There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`QUANTILES`, `SMOOTHED_AVERAGE`).                                                                                                          |
 | `attributes`             | `{}`                                                                 | Specifies which attributes should be used for this view. `attributes` is a map containing attribute names as key and either `true` or false as value. For example the value `{service.name: false, my_attr: true}` would remove the common attribute `service.name` from the view and add the user attribute `my_attr` to it. |
-| `with-common-attributes` | `true`                                                               | If true, all [common tags](metrics/common-tags.md) will be used for this view. Individual attributes can still be disabled via the `attributes` option.                                                                                                                                                                       |
+| `with-common-attributes` | `true`                                                               | If true, all [common attributes](metrics/common-attributes.md) will be used for this view. Individual attributes can still be disabled via the `attributes` option.                                                                                                                                                           |
 | `cardinality-limit`      | `2000`                                                               | Specifies the maximum amount of unique combinations of attributes for this view.                                                                                                                                                                                                                                              |
 | `bucket-boundaries`      | `[0,5,10,25,50,75,100,250,500,`<br/>`750,1000,2500,5000,7500,10000]` | *Required if aggregation is `HISTOGRAM`.* A list of the boundaries of the histogram buckets. E.g. `[7.5,42]` defines three histogram buckets split at `7.5` and `42`.                                                                                                                                                         |
 | `max-buckets`            | `160`                                                                | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The max number of positive buckets and negative buckets                                                                                                                                                                                                                 |
 | `max-scale`              | `20`                                                                 | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The maximum and initial scale.                                                                                                                                                                                                                                          |
 
-:::note
-Due to a limitation of the current OpenCensus library, it is **not possible to remove or alter views and metrics** once they have been registered.
-However, you can still add new views and metrics through dynamic configuration updates after the agent has already started.
-:::
+#### Choosing the instrument and aggregation
 
-<!-- TODO Does this still apply with our OpenTelemetry implementation? -->
+OpenTelemetry allows only specific combinations of `instrument-type` and `aggregation`. 
+If an instrument uses a view with incompatible aggregation, the view will be inactive.
+There is also an official [guideline](https://opentelemetry.io/docs/specs/otel/metrics/supplementary-guidelines/), how to use OpenTelemetry instruments.
+The following combinations are possible:
+
+| Instrument        | Allowed aggregations                        |
+|-------------------|---------------------------------------------|
+| `COUNTER`         | `SUM`, `HISTOGRAM`, `EXPONENTIAL_HISTOGRAM` |
+| `UP_DOWN_COUNTER` | `SUM`                                       |
+| `GAUGE`           | `LAST_VALUE`                                |
+| `HISTORGRAM`      | `SUM`, `HISTOGRAM`, `EXPONENTIAL_HISTOGRAM` |
+
+The custom aggregations of inspectIT `QUANTILES` and `SMOOTHED_AVERAGE` will ignore the `instrument-type` and always use `GAUGE`.
 
 ## Time Windowed Views
 
@@ -85,8 +94,8 @@ All of them have to be specified when using time windowed views!
 | `time-window`         | `${inspectit.metrics.frequency}` | The time window over which the data points are captured.             |
 | `max-buffered-points` | `16384`                          | A safety limit defining the maximum number of points to be buffered. |
 
-Note that time-windowed view will always use `GAUGE` as instrument type. the specified `instrument-type` of 
-the [metric configuration](#metrics) will be ignored for such views.
+>**Important note**: Time-windowed views will **always** use `GAUGE` as instrument type. The specified `instrument-type`
+of the [metric configuration](#metrics) will be ignored for such views.
 
 ### Quantiles View
 
