@@ -21,7 +21,7 @@ By default, all special sensors are enabled.
 ## JVM Local Context Propagation Sensors
 
 The context propagation sensors are necessary to enable tracing and [data propagation](instrumentation/rules.md#data-propagation) between multiple threads by passing the current context.
-By doing this, tags and scopes can be correlated to another in case of switching threads.
+By doing this, attributes and scopes can be correlated to another in case of switching threads.
 Propagation across JVM borders is realized purely through the default configuration of the agent.
 Hereby, propagation is supported for [HttpUrlConnection](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html),
 [Apache CloseableHttpClient](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/CloseableHttpClient.html)

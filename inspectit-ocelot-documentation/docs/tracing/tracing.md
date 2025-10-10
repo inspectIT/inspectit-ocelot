@@ -13,7 +13,6 @@ If used, the switch makes sure that the inspectIT Ocelot agent:
 * disables all trace exporters
 * removes tracing from all [instrumentation rules](instrumentation/rules.md)
 
-
 ### Global Sampling Rate
 
 It is possible to globally regulate the number of traces generated through [sampling](https://opentelemetry.io/docs/concepts/sampling/).
@@ -110,14 +109,14 @@ rules:
     metrics:
       my_metric:
         data-tags:
-          'example': 'my_data'
+          example: my_data
         constant-tags:
-          'scope': 'EXAMPLE'
+          scope: EXAMPLE
     tracing:
       start-span: true
 ```
 
-Each attribute key can only be used once within one trace. Thus, if a attribute key has been assigned multiple values within one rule,
+Each attribute key can only be used once within one trace. Thus, if an attribute key has been assigned multiple values within one rule,
 the acquired attribute value will be determined hierarchically. Attribute keys defined in `metrics.data-tags` will overwrite keys
 defined in `metrics.constant-tags`. Attribute keys defined in `tracing.attributes` will always overwrite attribute keys defined in `metrics`.
 

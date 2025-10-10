@@ -6,7 +6,7 @@ title: Metrics Recorders
 Metrics recorders are responsible for capturing system metrics, such as processor or memory usage. 
 All metrics recorders provided by inspectIT Ocelot publish the recorded data through the 
 OpenTelemetry API.
-Therefore, all recorded metrics can be exported via any of the [supported metrics exporters](metrics/metric-exporters).
+Therefore, all recorded metrics can be exported via any of the [supported metrics exporters](metrics/metric-exporters.md).
 Currently, the inspectIT Ocelot agent is capable of recording the following metrics:
 
 * [CPU](#cpu-metrics) (usage and number of cores)
@@ -51,7 +51,7 @@ Processor metrics are recorded by the `inspectit.metrics.processor` recorder.
 This recorder polls the captured data from the system with a frequency specified by `inspectit.metrics.processor.frequency` which defaults to `inspectit.metrics.frequency`.
 The available metrics are explained in the table below.
 
-| Metric           | Description                                                                                                                                                                                                                                                                                                                                                                           | Unit       | OpenCensus Metric Name   |
+| Metric           | Description                                                                                                                                                                                                                                                                                                                                                                           | Unit       | Metric Name              |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|--------------------------|
 | `count`          | The number of processor cores available to the JVM                                                                                                                                                                                                                                                                                                                                    | cores      | `system_cpu_count`       |
 | `system.average` | The sum of the number of runnable entities queued to the available processors and the number of runnable entities running on the available processors averaged over a minute for the whole system. See the definition of [getSystemAverageLoad()](https://docs.oracle.com/javase/7/docs/api/java/lang/management/OperatingSystemMXBean.html#getSystemLoadAverage()) for more details. | percentage | `system_load_average_1m` |
@@ -68,10 +68,10 @@ Disk space metrics are recorded by the `inspectit.metrics.disk` recorder.
 This recorder polls the captured data from the system with a frequency specified by `inspectit.metrics.disk.frequency` which defaults to `inspectit.metrics.frequency`.
 The available metrics are explained in the table below.
 
-| Metric  | Description                | Unit  | OpenCensus Metric Name |
-|---------|----------------------------|-------|------------------------|
-| `free`  | The free disk space        | bytes | `disk_free`            |
-| `total` | The total size of the disk | bytes | `disk_total`           |
+| Metric  | Description                | Unit  | Metric Name  |
+|---------|----------------------------|-------|--------------|
+| `free`  | The free disk space        | bytes | `disk_free`  |
+| `total` | The total size of the disk | bytes | `disk_total` |
 
 ## Memory Metrics
 
@@ -80,7 +80,7 @@ This recorder polls the captured data from the system with a frequency specified
 
 The first set of available metrics are general JVM memory metrics:
 
-| Metric      | Description                                                                  | Unit  | OpenCensus Metric Name |
+| Metric      | Description                                                                  | Unit  | Metric Name            |
 |-------------|------------------------------------------------------------------------------|-------|------------------------|
 | `used`      | The amount of used memory                                                    | bytes | `jvm_memory_used`      |
 | `committed` | The amount of memory that is committed for the Java virtual machine to use   | bytes | `jvm_memory_committed` |
@@ -91,7 +91,7 @@ Secondly an `id` attribute is added specifying the exact memory region, for exam
 
 Most JVMs also provide metrics regarding the usage of [buffer](https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html) pools, which are reflected in the following metrics provided by inspectIT Ocelot:
 
-| Metric            | Description                                                                    | Unit    | OpenCensus Metric Name      |
+| Metric            | Description                                                                    | Unit    | Metric Name                 |
 |-------------------|--------------------------------------------------------------------------------|---------|-----------------------------|
 | `buffer.count`    | An estimate of the number of buffers for each buffer pool                      | buffers | `jvm_buffer_count`          |
 | `buffer.used`     | An estimate of the memory that the JVM is currently using for each buffer pool | bytes   | `jvm_buffer_memory_used`    |
@@ -106,12 +106,12 @@ They are recorded by the `inspectit.metrics.threads` recorder.
 This recorder polls the captured data from the JVM with a frequency specified by `inspectit.metrics.threads.frequency` which defaults to `inspectit.metrics.frequency`.
 The available thread metrics are explained in the table below.
 
-| Metric   | Description                                                                             | Unit    | OpenCensus Metric Name |
-|----------|-----------------------------------------------------------------------------------------|---------|------------------------|
-| `peak`   | The peak number of live threads since the start of the JVM                              | threads | `jvm_threads_peak`     |
-| `live`   | The total number of currently live threads including both daemon and non-daemon threads | threads | `jvm_threads_live`     |
-| `daemon` | The total number of currently live daemon threads                                       | threads | `jvm_threads_daemon`   |
-| `states` | The total number of currently live threads for each state                               | threads | `jvm_threads_states`   |
+| Metric   | Description                                                                             | Unit    | Metric Name          |
+|----------|-----------------------------------------------------------------------------------------|---------|----------------------|
+| `peak`   | The peak number of live threads since the start of the JVM                              | threads | `jvm_threads_peak`   |
+| `live`   | The total number of currently live threads including both daemon and non-daemon threads | threads | `jvm_threads_live`   |
+| `daemon` | The total number of currently live daemon threads                                       | threads | `jvm_threads_daemon` |
+| `states` | The total number of currently live threads for each state                               | threads | `jvm_threads_states` |
 
 The `states` metric provides the amount of threads grouped by their state.
 For this purpose, an additional attribute `state` is added whose values correspond to the Java [Thread.State enum](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.State.html).
@@ -127,7 +127,7 @@ The availability of all garbage collection metrics depends on the capabilities o
 
 The recorder offers the following timing related metrics:
 
-| Metric                  | Description                                                        | Unit         | OpenCensus Metric Name         |
+| Metric                  | Description                                                        | Unit         | Metric Name                    |
 |-------------------------|--------------------------------------------------------------------|--------------|--------------------------------|
 | `pause`                 | The total time spent for Garbage Collection Pauses                 | milliseconds | `jvm_gc_pause`                 |
 | `concurrent.phase.time` | The total time spent in concurrent phases of the Garbage Collector | milliseconds | `jvm_gc_concurrent_phase_time` |
@@ -138,7 +138,7 @@ The `cause` attribute provides information on the circumstances which triggered 
 
 The following additional garbage collection metrics are also available:
 
-| Metric             | Description                                                                                   | Unit  | OpenCensus Metric Name     |
+| Metric             | Description                                                                                   | Unit  | Metric Name                |
 |--------------------|-----------------------------------------------------------------------------------------------|-------|----------------------------|
 | `live.data.size`   | The size of the old generation memory pool captured directly after a full GC.                 | bytes | `jvm_gc_live_data_size`    |
 | `max.data.size`    | The maximum allowed size of the old generation memory pool captured directly after a full GC. | bytes | `jvm_gc_max_data_size`     |
@@ -151,7 +151,7 @@ Class loading metrics are recorded by the `inspectit.metrics.classloader` record
 This recorder polls the captured data from the system with a frequency specified by `inspectit.metrics.classloader.frequency` which defaults to `inspectit.metrics.frequency`.
 The available metrics are explained in the table below.
 
-| Metric     | Description                                                     | Unit    | OpenCensus Metric Name |
+| Metric     | Description                                                     | Unit    | Metric Name            |
 |------------|-----------------------------------------------------------------|---------|------------------------|
 | `loaded`   | The total number of currently loaded classes in the JVM         | classes | `jvm_classes_loaded`   |
 | `unloaded` | The total number of unloaded classes since the start of the JVM | classes | `jvm_classes_unloaded` |

@@ -41,8 +41,8 @@ To trace the method hooks and actions of a specific rule, action tracing can be 
 inspectit:
   instrumentation:
     rules:
-      'r_example_rule':
+      r_example_rule:
         enable-action-tracing: true
 ```
 
-Note that this setting **only has an effect** if the action tracing mode is set to `ONLY_ENABLED`.!
+Note that this setting **only has an effect** if the action tracing mode is set to `ONLY_ENABLED`!

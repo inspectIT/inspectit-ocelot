@@ -3,7 +3,8 @@ id: tag-guard
 title: Tag-Guard
 ---
 
-Since version `2.6.0` it is possible to limit the amount of attribute/tag values of metrics.
+Since version `2.6.0` it is possible to limit the amount of attribute/tag values of metrics
+(tag and attribute are just synonyms for metric labels and mean the same thing).
 This can be useful for controlling the amount of attribute values, which will be written to your time series database
 (e.g. InfluxDB or Prometheus). A high amount of unique attribute values for a metric will result in a high cardinality, 
 which in turn might lead to performance or memory issues in your time series database.
@@ -59,7 +60,7 @@ Now, let's add another configuration:
 inspectit:
   metrics:
     definitions:
-      'my_metric':
+      my_metric:
         tag-guard: 100
 ```
 

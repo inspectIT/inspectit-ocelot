@@ -17,28 +17,28 @@ inspectit:
   instrumentation:
     actions:
 
-      #computes a nanosecond-timestamp as a long for the current point in time
-      'a_timing_nanos':
-        value: 'new Long(System.nanoTime())'
+      # computes a nanosecond-timestamp as a long for the current point in time
+      a_timing_nanos:
+        value: new Long(System.nanoTime())
 
-      #computes the elapsed milliseconds as double since a given nanosecond-timestamp
-      'a_timing_elapsedMillis':
+      # computes the elapsed milliseconds as double since a given nanosecond-timestamp
+      a_timing_elapsedMillis:
         input:
-          #the timestamp captured via System.nanoTime() to compare against
-          'since_nanos': 'long'
-        value: 'new Double( (System.nanoTime() - sinceNanos) * 1E-6)'
+          # the timestamp captured via System.nanoTime() to compare against
+          since_nanos: long
+        value: new Double( (System.nanoTime() - sinceNanos) * 1E-6 )
 
-      'a_string_replace_all':
+      a_string_replace_all:
         input:
-          'regex': 'String'
-          'replacement': 'String'
-          'string': 'String'
-        value: 'string.replaceAll(regex,replacement)'
+          regex: String
+          replacement: String
+          string: String
+        value: string.replaceAll(regex,replacement)
 
-      'a_method_getClassFQN':
+      a_method_getClassFQN:
         input:
           _class: Class
-        value: '_class.getName()'
+        value: _class.getName()
 ```
 
 The code executed when an action is invoked is defined through the `value` configuration property.
@@ -114,7 +114,7 @@ The body is given without surrounding curly braces. One example action from the 
 inspectit:
   instrumentation:
     actions:
-      'a_get_servlet_request_path':
+      a_get_servlet_request_path:
         imports:
           - 'javax.servlet'
           - 'javax.servlet.http'
@@ -292,7 +292,7 @@ rules:
           target: shared_object
           value: some_value
         constant-input:
-          key: 'my-key'
+          key: "my-key"
 
   r_second: # second thread
     entry:
@@ -305,7 +305,7 @@ rules:
         data-input:
           target: shared_object
         constant-input:
-          key: 'my-key
+          key: "my-key"
 ```
 
 ### Debugging
@@ -394,6 +394,6 @@ rules:
         data-input:
           string: http_path_raw
         constant-input:
-          'pattern': '\/apps\/.+\/.+'
-          'replacement': '/apps/{service}/{location}'
+          pattern: '\/apps\/.+\/.+'
+          replacement: '/apps/{service}/{location}'
 ```

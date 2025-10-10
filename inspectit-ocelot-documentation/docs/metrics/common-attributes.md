@@ -5,7 +5,7 @@ title: Common Attributes
 
 inspectIT Ocelot provides a map of common attribute keys and values that are used when recording all metrics.
 This feature enables to "label" metrics collected with inspectIT Ocelot and to share common information about a process or an environment where the process runs.
-The map can be [extended or overwritten by the user](#user-defined-tags) when this is required.
+The map can be [extended or overwritten by the user](#user-defined-attributes) when this is required.
 
 :::tip
 The common attributes can also be added in tracing spans.
@@ -22,7 +22,7 @@ inspectIT Ocelot currently supports the following attribute providers:
 | [User Defined Attributes](#user-defined-attributes) | -                                      | Yes                       | No                 | HIGH     |
 | [Environment Attributes](#environment-attributes)   | `service.name`, `host.name`, `host.ip` | Yes                       | Yes                | LOW      |
 
-> Run-time updates currently only support changing of an attribute value, but not adding or removing attributes.
+> Runtime updates currently only support changing of an attribute value, but not adding or removing attributes.
 
 ## User Defined Attributes
 
@@ -30,8 +30,8 @@ User defined attributes can be added to the common baggage by defining the `insp
 
 * Setting the user defined attributes using properties:
    ```properties
-   inspectit.tags.extra.region=us-west-1
-   inspectit.tags.extra.stage=preprod
+   inspectit.attributes.extra.region=us-west-1
+   inspectit.attributes.extra.stage=preprod
    ```
 
 * Setting the user defined attributes using YAML file:
