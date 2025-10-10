@@ -6,7 +6,7 @@ title: Metrics Exporters
 Metrics exporters are responsible for passing the recorded metrics to a metric storage.
 They can implement a push approach where metrics are sent to a collector or a pull approach where metrics are scraped by an external system.
 
-If an exporter supports run-time updates it means that it can be enabled/disabled during the run-time or that any property related to the exporter can be changed.
+If an exporter supports runtime updates it means that it can be enabled/disabled during the run-time or that any property related to the exporter can be changed.
 This way you can, for example, change the endpoint where exporter pushes the metrics without a need to restart the application.
 In order to use run-time updates, you must enable one of the [externalized configuration methods](configuration/external-configuration-sources) that support dynamic updates.
 
@@ -16,10 +16,9 @@ inspectIT Ocelot currently supports the following metrics exporters:
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|-------------|--------------------|
 | [Logging Exporter (Metrics)](#logging-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingMetricExporter.java)] | Yes                       | Push        | No                 |
 | [Prometheus Exporter](#prometheus-exporter)                                                                                                                                                                                       | Yes                       | Pull        | No                 |
-| [InfluxDB Exporter](#influxdb-exporter)                                                                                                                                                                                           | Yes                       | Push        | No                 |
 | [OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]                                                                             | Yes                       | Push        | No                 |
 
->**Important note**: Starting with version `2.0.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+>**Important note**: Starting with version `3.0.0` the `InfluxDB Exporter` is no longer supported. Check out the migration guide in [breaking changes](breaking-changes/breaking-changes.md#breaking-changes-in-300).
 
 ## Logging Exporter (Metrics)
 
@@ -46,33 +45,6 @@ The following properties are nested properties below the `inspectit.exporters.me
 | `.port`    | `8888`     | The port the Prometheus HTTP server should use.                                                                                           |
 
 > Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://opentelemetry.io/docs/specs/otel/metrics/sdk_exporters/prometheus/).
-
-## InfluxDB Exporter
-If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
-To enable the InfluxDB Exporters, it is only required to specify the `endpoint`.
-
-The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
-Usually, the absolute value of such counters is irrelevant when querying the data, instead you want to have the increase of it over a certain period of time.
-With the `counters-as-differences` option enabled, counters are preprocessed before being exported.
-
-Instead of writing the absolute value of each counter into the InfluxDB, only the increase since the last export will be written.
-In addition, no value will be exported, if the counter has not changed since the last export.
-This can greatly reduce the amount of data written into the InfluxDB, especially if the metrics are quite constant and won't change much.
-
-The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
-
-| Property                                | Default                                 | Description                                                                                                                                                                                     |
-|-----------------------------------------|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.enabled`                              | `IF_CONFIGURED`                         | If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`. |
-| `.endpoint`                             | `null`                                  | The HTTP endpoint of the InfluxDB, e.g. `http://localhost:8086`.                                                                                                                                |
-| `.user`                                 | `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.                                                                                                                               |
-| `.password`                             | `null`                                  | The password to use for connecting to the InfluxDB, can be not be empty.                                                                                                                        |
-| `.database`                             | `inspectit`                             | The InfluxDB database to which the metrics are pushed.                                                                                                                                          |
-| `.retention-policy`                     | `autogen`                               | The retention policy of the database to use for writing metrics.                                                                                                                                |
-| `.create-database`                      | `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.                                    |
-| `.export-interval`                      | refers to `inspectit.metrics.frequency` | Defines how often metrics are pushed to the InfluxDB.                                                                                                                                           |
-| <nobr>`.counters-as-differences`</nobr> | `true`                                  | Defines whether counters are exported using their absolute value or as the increase between exports                                                                                             |
-| `buffer-size`                           | `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.                               |
 
 ## OTLP Exporter (Metrics)
 

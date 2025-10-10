@@ -8,7 +8,7 @@ sidebar_label: Demo Application
 
 If you would like to see inspectIT Ocelot in action with a demo application, you can use the docker compose examples described below.  
 The distributed version of the [Spring PetClinic sample application](https://github.com/spring-petclinic/spring-petclinic-microservices) is used as the target application.
-To demonstrate the flexibility of the OpenCensus based inspectIT agent, different demo scenarios covering different monitoring and APM components are provided.
+To demonstrate the flexibility of the OpenTelemetry based inspectIT agent, different demo scenarios covering different monitoring and APM components are provided.
 
 All the demo scenarios are fully configured with predefined dashboards, *so you can get started in 5 minutes*.
 
@@ -17,6 +17,7 @@ All the demo scenarios are fully configured with predefined dashboards, *so you 
 :::warning
 Currently, the demo is only available as Docker images for the AMD64 architecture.
 On ARM platforms there may be problems with the execution.
+However, inspectIT Ocelot provides both AMD & ARM Docker images.
 :::
 
 *Pre-requisites:* To launch the demo, [Docker](https://www.docker.com/) needs to be installed on your system.
@@ -95,7 +96,7 @@ Traces are exported to Jaeger via OpenTelemetry Collector.
 In this scenario the following components are preconfigured and used for monitoring:
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
-- *InfluxDB:* Stores metric data exported by OpenCensus as time series.
+- *InfluxDB:* Stores metric data exported by OpenTelemetry as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent & EUM server. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *OpenTelemetry collector:* Receives traces by the agent & EUM server and forwards them to Jaeger.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
@@ -116,7 +117,7 @@ Traces are exported to Zipkin directly or via OpenTelemetry collector.
 In this scenario the following components are preconfigured and used for monitoring:
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
-- *InfluxDB:* Stores metric data exported by OpenCensus as time series.
+- *InfluxDB:* Stores metric data exported by OpenTelemetry as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *OpenTelemetry collector:* Receives traces by the EUM server and forwards them to Zipkin.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
@@ -128,19 +129,19 @@ The traces can be viewed in Zipkin on http://localhost:9411.
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
 
 ### Agent
-| Name + Grafana Marketplace | Description | Screenshot|
-| -------------- | ------- | -------- |
-| Service Graph [[InfluxDB]](https://grafana.com/dashboards/10142) [[Prometheus]](https://grafana.com/dashboards/10139) | Shows a graph of all instrumented and external services and their interaction. All flows are derived based on live metrics. |[![](assets/demo-dashboard-servicegraph_small.png)](assets/demo-dashboard-servicegraph.png)|
-| HTTP Metrics [[InfluxDB]](https://grafana.com/dashboards/10141) [[Prometheus]](https://grafana.com/dashboards/10138) | Shows statistics of incoming and outgoing HTTP requests for each instrumented service. | [![](assets/demo-dashboard-http_small.png)](assets/demo-dashboard-http.png)|
-| System Metrics [[InfluxDB]](https://grafana.com/dashboards/9601) [[Prometheus]](https://grafana.com/dashboards/9599) | Shows system metrics, such as system CPU utilization, load average and disk usage. | [![](assets/demo-dashboard-system_small.png)](assets/demo-dashboard-system.png)|
-| JVM Metrics [[InfluxDB]](https://grafana.com/dashboards/9600) [[Prometheus]](https://grafana.com/dashboards/9598) | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection. | [![](assets/demo-dashboard-jvm_small.png)](assets/demo-dashboard-jvm.png)|
-| Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md). | [![](assets/demo-dashboard-selfmonitoring_small.png)](assets/demo-dashboard-selfmonitoring.png)|
+| Name + Grafana Marketplace                                                                                              | Description                                                                                                                 | Screenshot                                                                                      |
+|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| Service Graph [[InfluxDB]](https://grafana.com/dashboards/10142) [[Prometheus]](https://grafana.com/dashboards/10139)   | Shows a graph of all instrumented and external services and their interaction. All flows are derived based on live metrics. | [![](assets/demo-dashboard-servicegraph_small.png)](assets/demo-dashboard-servicegraph.png)     |
+| HTTP Metrics [[InfluxDB]](https://grafana.com/dashboards/10141) [[Prometheus]](https://grafana.com/dashboards/10138)    | Shows statistics of incoming and outgoing HTTP requests for each instrumented service.                                      | [![](assets/demo-dashboard-http_small.png)](assets/demo-dashboard-http.png)                     |
+| System Metrics [[InfluxDB]](https://grafana.com/dashboards/9601) [[Prometheus]](https://grafana.com/dashboards/9599)    | Shows system metrics, such as system CPU utilization, load average and disk usage.                                          | [![](assets/demo-dashboard-system_small.png)](assets/demo-dashboard-system.png)                 |
+| JVM Metrics [[InfluxDB]](https://grafana.com/dashboards/9600) [[Prometheus]](https://grafana.com/dashboards/9598)       | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection.                              | [![](assets/demo-dashboard-jvm_small.png)](assets/demo-dashboard-jvm.png)                       |
+| Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md).                | [![](assets/demo-dashboard-selfmonitoring_small.png)](assets/demo-dashboard-selfmonitoring.png) |
 
 ### End User Monitoring
-| Name | Description | Screenshot|
-| ---------- | ------- | -------- |
-| Beacons  | Shows metrics for the number of processed beacons and their average processing times | [![](assets/demo-dashboard-beacons_small.png)](assets/demo-dashboard-beacons.png)|
-| Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces| [![](assets/demo-dashboard-trace-controller_small.png)](assets/demo-dashboard-trace-controller.png)|
+| Name             | Description                                                                                                           | Screenshot                                                                                          |
+|------------------|-----------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| Beacons          | Shows metrics for the number of processed beacons and their average processing times                                  | [![](assets/demo-dashboard-beacons_small.png)](assets/demo-dashboard-beacons.png)                   |
+| Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces | [![](assets/demo-dashboard-trace-controller_small.png)](assets/demo-dashboard-trace-controller.png) |
 
 ## Changing Agent Configurations
 

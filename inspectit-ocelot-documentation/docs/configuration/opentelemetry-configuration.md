@@ -1,12 +1,12 @@
 ---
 id: opentelemetry-configuration
-title: Using OpenTelemetry Library with inspectIT Ocelot
+title: Using OpenTelemetry with inspectIT Ocelot
 sidebar_label: OpenTelemetry Configuration
 ---
 
 If you plan to use the OpenTelemetry library in an application which will be instrumented later on with inspectIT Ocelot, 
 some special rules do apply.
-Following these rules will make sure that there are no run-time problems in your application.
+Following these rules will make sure that there are no runtime problems in your application.
 Furthermore, a correct configuration will make it possible to combine metrics and traces that you manually collect 
 using the OpenTelemetry instrumentation library with the ones collected by the inspectIT Ocelot agent.
 
@@ -43,4 +43,5 @@ using the OpenTelemetry instrumentation library with the ones collected by the i
 
    It is important to state that the agent will *not* publish the OpenTelemetry classes to the bootstrap classloader 
    if it is attached during runtime – even if the previously mentioned JVM argument is set! 
-   In this case, metrics and traces of *manual OpenTelemetry instrumentations* will *not* be collected by the inspectIT Ocelot agent.
+   In this case, metrics and traces of *manual OpenTelemetry instrumentation* of the application will *not* be 
+   collected by the inspectIT Ocelot agent.

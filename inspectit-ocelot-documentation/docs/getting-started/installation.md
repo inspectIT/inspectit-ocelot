@@ -7,8 +7,8 @@ This section describes the installation details for the inspectIT Ocelot agent.
 
 ## Supported Java Runtime Environments
 
-The inspectIT Ocelot supports Java Runtime Environments in version 1.8.0 and above. You will not be able to use the agent with the lower Java versions.
-The agent works with different JRE distributions including Oracle, openJDK, Azul, etc.
+The inspectIT Ocelot supports Java Runtime Environments in **version 1.8.0 and above**. You will not be able to use the agent with the lower Java versions.
+The agent works with different JRE distributions including Oracle, openJDK, IBM, Azul, etc.
 
 It is recommended to always use the latest minor release of your current Java Runtime Environment version in order to ensure straightforward operation.
 
@@ -56,7 +56,7 @@ $ ./jattach.sh <PID> load instrument false /path/to/inspectit-ocelot-agent-{insp
 ```
 In this example we're also passing [JSON arguments](configuration/configuration-sources.md#java-agent-arguments) to the agent in order to configure its service name.
 
-> Using the attach options has some limitations with respect to using the OpenCensus instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenCensus Configuration](configuration/open-census-configuration.md) section to understand these limitations.
+> Using the attach options has some limitations with respect to using the OpenTelemetry instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenTelemetry Configuration](configuration/opentelemetry-configuration.md) section to understand these limitations.
 
 ## Using the Agent With a Security Manager
 

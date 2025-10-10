@@ -19,32 +19,32 @@ inspectit:
   instrumentation:
     rules:
 
-      'r_record_method_duration':
+      r_record_method_duration:
 
         entry:
-          'method_entry_time':
-            action: 'a_timing_nanos'
-          'class_name':
-            action: 'a_method_getClassFQN'
-          'method_name_with_params':
-            action: 'a_method_getNameWithParameters'
+          method_entry_time:
+            action: a_timing_nanos
+          class_name:
+            action: a_method_getClassFQN
+          method_name_with_params:
+            action: a_method_getNameWithParameters
 
         exit:
-          'method_duration':
-            action: 'a_timing_elapsedMillis'
+          method_duration_value:
+            action: a_timing_elapsedMillis
             data-input:
-              'since_nanos': 'method_entry_time'
+              since_nanos: method_entry_time
 
         metrics:
-          '[method/duration]' : 
-            value: 'method_duration'
+          method_duration: 
+            value: method_duration_value
             data-tags:
-              'class': 'class_name'
-              'method': 'method_name_with_params'
+              class: class_name
+              method: method_name_with_params
 ```
 
 This example rule named `r_record_method_duration` measures the duration of the instrumented method and outputs the value using
-the `method/duration` metric. The actions `a_timing_nanos` and `a_timing_elapsedMillis` should be familiar 
+the `method_duration` metric. The actions `a_timing_nanos` and `a_timing_elapsedMillis` should be familiar 
 for you from the previous [actions](instrumentation/actions.md) section.
 
 As the name states, we define under the `entry` property of the rule which actions are performed on method entry.
@@ -57,9 +57,9 @@ Note that we also define how the data is collected: For `method_entry_time` we i
 named `a_timing_nanos` and for `class_name` the one named `a_method_getClassFQN`.
 
 This data is then used on method exit: using the action `a_timing_elapsedMillis` we compute the time which has passed 
-since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. 
+since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method_duration` metric. 
 As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected class and name of the method is used as 
-a tag for all of its views.
+a attribute for all of its views.
 
 
 ## Defining Rules
@@ -76,10 +76,10 @@ Therefore, this rule is defined without scopes, but you can easily add some in y
 inspectit:
   instrumentation:
     rules:
-      'r_record_method_duration':
+      r_record_method_duration:
         scopes:
-          's_my_first_scope': true
-          's_my_second_scope': true
+          s_my_first_scope: true
+          s_my_second_scope: true
 ```
 
 With this snippet we defined that the existing rule `record_method_duration` gets applied on the two scopes named 
@@ -117,14 +117,14 @@ Let's take a look again at the entry phase definitions of the `record_method_dur
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_record_method_duration':
+r_record_method_duration:
   entry:
-    'method_entry_time':
-      action: 'a_timing_nanos'
-    'class_name':
-      action: 'a_method_getClassFQN'
-    'method_name_with_params':
-      action: 'a_method_getNameWithParameters'
+    method_entry_time:
+      action: a_timing_nanos
+    class_name:
+      action: a_method_getClassFQN
+    method_name_with_params:
+      action: a_method_getNameWithParameters
 ```
 
 The `entry` and `exit` configuration options are YAML dictionaries mapping data keys to _action invocations_.
@@ -146,12 +146,12 @@ We have already seen how the assignment of data values to parameters is done in 
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_record_method_duration':
+r_record_method_duration:
   exit:
-    'method_duration':
-      action: 'a_timing_elapsedMillis'
+    method_duration_value:
+      action: a_timing_elapsedMillis
       data-input:
-        'since_nanos': 'method_entry_time'
+        since_nanos: method_entry_time
 ```
 
 The `a_timing_elapsedMillis` action requires a value for the input parameter `since_nanos`.
@@ -161,12 +161,12 @@ The assignment of constant values works very similar:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_example_rule':
+r_example_rule:
   entry:
-    'hello_world_text':
-      action: 'a_assign_value'
+    hello_world_text:
+      action: a_assign_value
       constant-input:
-        'value': 'Hello World!'
+        value: Hello World!
 ```
 
 Note that when assigning a constant value, inspectIT Ocelot automatically converts the given value to the type expected 
@@ -180,15 +180,15 @@ You can also mix which parameters you assign from data and which from constants:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_example_rule':
+r_example_rule:
   entry:
-    'bye_world_text':
-      action: 'a_string_replace_all'
+    bye_world_text:
+      action: a_string_replace_all
       data-input:
-        'string': 'hello_world_text'
+        string: hello_world_text
       constant-input:
-        'regex': 'Hello'
-        'replacement': 'Bye'
+        regex: Hello
+        replacement: Bye
 ```
 
 As expected given the [definition](instrumentation/actions.md) of the `string_replace_all` action, 
@@ -210,13 +210,13 @@ An example for the usage of a condition is given below:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_example_rule':
+r_example_rule:
   entry:
-    'application_name':
-      action: 'a_assign_value'
+    application_name:
+      action: a_assign_value
       constant-input:
-        'value': 'My-Application'
-      only-if-null: 'application_name'
+        value: My-Application
+      only-if-null: application_name
 ```
 
 In this example we define an invocation to set the value of the data key `application_name`
@@ -255,12 +255,12 @@ a new `span_id`. This can easily be realized using the `pre-entry` phase for act
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-'r_example_rule':
+r_example_rule:
   pre-entry:
-    'parent_span':
-      action: 'a_assign_value'
+    parent_span:
+      action: a_assign_value
       data-input:
-        'value': 'span_id'
+        value: span_id
 ```
 
 ## Modularizing Rules
@@ -278,26 +278,26 @@ To overcome these issues, Ocelot allows you to include rules from within other r
 
 ```yaml
     rules:
-      'r_myhttp_extract_path':
+      r_myhttp_extract_path:
         entry:
-          'my_http_path':
+          my_http_path:
             #logic to extract the http path and save it in the context here...
           
-      'r_myhttp_tracing':
+      r_myhttp_tracing:
         include:
-          'myhttp_extract_path': true
+          myhttp_extract_path: true
         scopes:
-          's_myhttp_scope': true
+          s_myhttp_scope: true
         tracing:
           start-span: true
           attributes:
-            'path': 'my_http_path'
+            path: my_http_path
             
-      'r_myhttp_record_metric':
+      r_myhttp_record_metric:
         include:
-          'myhttp_extract_path': true
+          myhttp_extract_path: true
         scopes:
-          's_myhttp_scope': true
+          s_myhttp_scope: true
         metrics:
           #record http metric here...
 ```
@@ -329,7 +329,7 @@ collecting simple data.
 ### Collecting Method Metrics
 
 Include the rule `r_method_metric` to record the duration of the method call as metric.
-In addition, some tags are added to the metric, like method name or error status.
+In addition, some attributes are added to the metric, like method name or error status.
 In the upcoming section you will learn more about [Collecting Metrics](instrumentation/metrics.md).
 
 ```yaml
