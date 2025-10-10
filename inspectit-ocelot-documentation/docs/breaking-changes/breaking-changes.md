@@ -10,7 +10,9 @@ title: Breaking Changes
 Starting with the current release, inspectIT Ocelot fully migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry).
 OpenCensus has been completely replaced by OpenTelemetry within the **Java agent** as well as the **EUM server**.
 
-### Updated metric definition
+### Updated metrics
+
+#### Updated metric definition
 
 By switching to OpenTelemetry metrics, the configuration model for [metrics](metrics/custom-metrics.md#metrics) and 
 [views](metrics/custom-metrics.md#views) have changed. The metrics property `type` has been updated to `value-type`.
@@ -29,7 +31,7 @@ supported by the EUM server previously. There are some other new options, which 
 Another change involves the metric output of inspectIT. Since the [metric data model](https://opentelemetry.io/docs/specs/otel/metrics/data-model/) has changed, it will probably be necessary
 to update dashboards or database configurations.
 
-### Updated metric names
+#### Updated metric names
 
 With this version we are also updating our naming conventions for metrics. Instead of slashes `/`, we will start
 to use underscores `_`. Thus, metrics like `method/duration` have been renamed to `method_duration`.
