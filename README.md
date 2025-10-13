@@ -8,10 +8,9 @@
 [![Configuration Server Tests](https://github.com/inspectIT/inspectit-ocelot/actions/workflows/configurationserver_test.yml/badge.svg)](https://github.com/inspectIT/inspectit-ocelot/actions/workflows/configurationserver_test.yml)
 [![Configuration UI Tests](https://github.com/inspectIT/inspectit-ocelot/actions/workflows/configuration_ui_test.yml/badge.svg)](https://github.com/inspectIT/inspectit-ocelot/actions/workflows/configuration_ui_test.yml)
 
-[inspectIT Ocelot](https://inspectit.rocks/) is a zero-configuration Java agent for dynamically collecting application performance,
- tracing and behavior data based on the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) for Tracing and [OpenCensus library](https://opencensus.io/) for Metrics-Export.
-Despite the zero-configuration capability, it provides a powerful configuration feature
- which enables a full and in-depth customization of all features.
+[inspectIT Ocelot](https://inspectit.rocks/) is a zero-configuration Java agent for dynamically collecting application performance, 
+tracing and behavior data based on the [OpenTelemetry SDK](https://github.com/open-telemetry/opentelemetry-java) for Tracing and Metrics.
+Despite the zero-configuration capability, it provides a powerful configuration feature which enables a full and in-depth customization of all features.
 In order to use inspectIT Ocelot, the source code of the target application does
 **not** have to be touched, changed or modified - even access to the actual source code is not required.
 It automatically injects all required components and executes the necessary actions by itself.
