@@ -41,6 +41,7 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.exporter.MetricReaderProvider;
 import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.opentelemetry.resource.ResourceAttributesProvider;
@@ -115,11 +116,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     Map<String, SpanExporter> registeredTraceExportServices = new ConcurrentHashMap<>();
 
     /**
-     * The registered {@link MetricReader}
+     * The registered services, which provide new metric readers.
+     * Since we need to build new metric readers for every SDK update, we cannot store metric readers directly.
      */
     @VisibleForTesting
     @Getter(AccessLevel.PACKAGE)
-    Map<String, MetricReader> registeredMetricReaders = new ConcurrentHashMap<>();
+    Map<String, MetricReaderProvider> registeredMetricReaderProviders = new ConcurrentHashMap<>();
 
     /**
      * The registered {@link MetricProducer}
@@ -281,6 +283,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         viewsChanged = viewManager.shouldUpdateViews();
         boolean configurationChanged = !active || metricSettingsChanged || tracingSettingsChanged || viewsChanged;
+        boolean updateMetrics = metricSettingsChanged || viewsChanged || !active;
 
         if (configurationChanged) {
 
@@ -288,7 +291,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !active) ? tracerProvider : configureTracerProvider(configuration);
 
             // configure meter provider (metrics) if not configured or when metrics settings changed
-            SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || viewsChanged || !active) ? meterProvider : configureMeterProvider();
+            SdkMeterProvider sdkMeterProvider = !updateMetrics ? meterProvider : configureMeterProvider();
 
             // only if metrics/views settings changed or OTel has not been configured and is running, we need to rebuild the OpenTelemetrySdk
             if (metricSettingsChanged || viewsChanged || !active) {
@@ -309,10 +312,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             log.error("Failed to configure OpenTelemetry. Please scan the logs for detailed failure messages");
         }
 
-        if (configurationChanged) {
-            OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success);
-            eventPublisher.publishEvent(event);
-        }
+        OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success, updateMetrics);
+        eventPublisher.publishEvent(event);
 
         isConfiguring.set(false);
         tracingSettingsChanged = false;
@@ -477,9 +478,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             }
 
             // register metric reader for each service
-            if (!CollectionUtils.isEmpty(registeredMetricReaders)) {
-                for (MetricReader metricReader : registeredMetricReaders.values()) {
-                    builder.registerMetricReader(metricReader);
+            if (!CollectionUtils.isEmpty(registeredMetricReaderProviders)) {
+                for (MetricReaderProvider provider : registeredMetricReaderProviders.values()) {
+                    builder.registerMetricReader(provider.getNewMetricReader());
                 }
             }
             else {
@@ -509,10 +510,19 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         return registerTraceExporterService((SpanExporter) spanExporter, serviceName);
     }
 
+    @Override
+    public boolean registerMetricReader(Object metricReader, String serviceName) {
+        if (!(metricReader instanceof MetricReader)) {
+            throw new RuntimeException(String.format("Cannot register metric reader. The object '%s' is not instance of '%s'", metricReader.getClass(), MetricReader.class));
+        }
+        MetricReaderProvider provider = () -> (MetricReader) metricReader;
+        return registerMetricReaderProvider(provider, serviceName);
+    }
+
     /**
-     * Registers a new {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service} that is used to export {@link io.opentelemetry.sdk.trace.data.SpanData} for sampled {@link io.opentelemetry.api.trace.Span}s
+     * Registers a new {@link DynamicallyActivatableService trace exporter service} that is used to export {@link io.opentelemetry.sdk.trace.data.SpanData} for sampled {@link io.opentelemetry.api.trace.Span}s
      *
-     * @param spanExporter The {@link SpanExporter} of the {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service}
+     * @param spanExporter The {@link SpanExporter} of the {@link DynamicallyActivatableService trace exporter service}
      * @param serviceName  The name of the trace exporter service
      *
      * @return Whether the registration was successful
@@ -545,12 +555,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Unregisters a {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service} registered under the given name.
-     * For this, the {@link SpanExporter} of the {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService} is removed from {@link #registeredTraceExportServices} and {@link #multiSpanExporter}.
+     * Unregisters a {@link DynamicallyActivatableService trace exporter service} registered under the given name.
+     * For this, the {@link SpanExporter} of the {@link DynamicallyActivatableService} is removed from {@link #registeredTraceExportServices} and {@link #multiSpanExporter}.
      *
-     * @param serviceName The name of the {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service}
+     * @param serviceName The name of the {@link DynamicallyActivatableService trace exporter service}
      *
-     * @return Whether the {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service} was successfully unregistered. Returns false if no service with the given name was previously registered
+     * @return Whether the {@link DynamicallyActivatableService trace exporter service} was successfully unregistered. Returns false if no service with the given name was previously registered
      */
     public boolean unregisterTraceExporterService(String serviceName) {
         if (null != registeredTraceExportServices.remove(serviceName) & (multiSpanExporter == null || multiSpanExporter.unregisterSpanExporter(serviceName))) {
@@ -562,25 +572,16 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         }
     }
 
-    @Override
-    public boolean registerMetricReader(Object metricReader, String serviceName) {
-        if (!(metricReader instanceof MetricReader)) {
-            throw new RuntimeException(String.format("Cannot register metric reader. The object '%s' is not instance of '%s'", metricReader.getClass(), MetricReader.class));
-        }
-        return registerMetricReader((MetricReader) metricReader, serviceName);
-    }
-
     /**
-     * Registers a {@link MetricReader}
+     * Registers a DynamicallyActivatableMetricsExporterService, which provides a {@link MetricReader}
      *
-     * @param metricReader The metric reader
-     * @param serviceName The service name of the registered reader
+     * @param provider The provider for {@link MetricReader metric readers}
      *
-     * @return Whether the {@link MetricReader} was successfully registered
+     * @return Whether the provider was successfully registered
      */
-    public boolean registerMetricReader(MetricReader metricReader, String serviceName) {
+    public boolean registerMetricReaderProvider(MetricReaderProvider provider, String serviceName) {
         try {
-            if (null == registeredMetricReaders.put(serviceName, metricReader)) {
+            if (null == registeredMetricReaderProviders.put(serviceName, provider)) {
                 log.info("The service {} was successfully registered", serviceName);
                 notifyMetricsSettingsChanged();
                 return true;
@@ -602,7 +603,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return Whether the {@link MetricReader service} was successfully unregistered. Returns false if a service with the given name was already registered and has been overwritten.
      */
     public boolean unregisterMetricExporterService(String serviceName) {
-        if (null != registeredMetricReaders.remove(serviceName)) {
+        if (null != registeredMetricReaderProviders.remove(serviceName)) {
             notifyMetricsSettingsChanged();
             return true;
         } else {

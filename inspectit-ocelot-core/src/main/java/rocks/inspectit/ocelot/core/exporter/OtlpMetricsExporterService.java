@@ -5,6 +5,7 @@ import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,20 +28,12 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class OtlpMetricsExporterService extends DynamicallyActivatableService {
+public class OtlpMetricsExporterService extends DynamicallyActivatableService implements MetricReaderProvider {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
 
-    /**
-     * The {@link MetricExporter} for exporting metrics via OTLP
-     */
-    @VisibleForTesting
-    MetricExporter metricExporter;
-
-    /**
-     * The {@link PeriodicMetricReader} for reading metrics
-     */
-    private MetricReader metricReader;
+    /** The current exporter settings */
+    private OtlpMetricsExporterSettings settings;
 
     public OtlpMetricsExporterService() {
         super("metrics.enabled", "exporters.metrics.otlp");
@@ -72,46 +65,12 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
-            AggregationTemporalitySelector aggregationTemporalitySelector = otlp.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
+            settings = configuration.getExporters().getMetrics().getOtlp();
 
-            switch (otlp.getProtocol()) {
-                case GRPC: {
-                    OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
-                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                            .setEndpoint(otlp.getEndpoint())
-                            .setCompression(otlp.getCompression().toString())
-                            .setTimeout(otlp.getTimeout());
-                    if (otlp.getHeaders() != null) {
-                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
-                            metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
-                        }
-                    }
-                    metricExporter = metricExporterBuilder.build();
-                    break;
-                }
-                case HTTP_PROTOBUF: {
-                    OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
-                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                            .setEndpoint(otlp.getEndpoint())
-                            .setCompression(otlp.getCompression().toString())
-                            .setTimeout(otlp.getTimeout());
-                    if (otlp.getHeaders() != null) {
-                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
-                            metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
-                        }
-                    }
-                    metricExporter = metricExporterBuilder.build();
-                    break;
-                }
-            }
-            metricReader = PeriodicMetricReader.builder(metricExporter)
-                    .setInterval(otlp.getExportInterval())
-                    .build();
+            boolean success = openTelemetryController.registerMetricReaderProvider(this, getName());
 
-            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
             if (success) {
-                log.info("Starting {} with protocol {} on endpoint {}", getName(), otlp.getProtocol(), otlp.getEndpoint());
+                log.info("Starting {} with protocol {} on endpoint {}", getName(), settings.getProtocol(), settings.getEndpoint());
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
@@ -131,6 +90,58 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableService {
         } catch (Exception e) {
             log.error("Failed to stop OtlpMetricsExporter", e);
             return false;
+        }
+    }
+
+    @Override
+    public MetricReader getNewMetricReader() {
+        MetricExporter exporter = getNewMetricExporter();
+        return PeriodicMetricReader.builder(exporter)
+                .setInterval(settings.getExportInterval())
+                .build();
+    }
+
+    /**
+     * We also create a new metric exporter, since the previous one will be unusable,
+     * if we call {@code shutdown} on the previous {@link SdkMeterProvider}.
+     *
+     * @return the newly created metric exporter
+     */
+    @VisibleForTesting
+    MetricExporter getNewMetricExporter() {
+        AggregationTemporalitySelector aggregationTemporalitySelector = settings.getPreferredTemporality() == AggregationTemporality.DELTA ?
+                AggregationTemporalitySelector.deltaPreferred() :
+                AggregationTemporalitySelector.alwaysCumulative();
+
+        switch (settings.getProtocol()) {
+            case GRPC: {
+                OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
+                        .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                        .setEndpoint(settings.getEndpoint())
+                        .setCompression(settings.getCompression().toString())
+                        .setTimeout(settings.getTimeout());
+                if (settings.getHeaders() != null) {
+                    for (Map.Entry<String, String> headerEntry : settings.getHeaders().entrySet()) {
+                        metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                    }
+                }
+                return metricExporterBuilder.build();
+            }
+            case HTTP_PROTOBUF: {
+                OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
+                        .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                        .setEndpoint(settings.getEndpoint())
+                        .setCompression(settings.getCompression().toString())
+                        .setTimeout(settings.getTimeout());
+                if (settings.getHeaders() != null) {
+                    for (Map.Entry<String, String> headerEntry : settings.getHeaders().entrySet()) {
+                        metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                    }
+                }
+                return metricExporterBuilder.build();
+            }
+            default:
+                throw new IllegalArgumentException("Unknown OpenTelemetry protocol: " + settings.getProtocol());
         }
     }
 }

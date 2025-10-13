@@ -14,12 +14,10 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
  */
 @Component
 @Slf4j
-public class PrometheusExporterService extends DynamicallyActivatableService {
+public class PrometheusExporterService extends DynamicallyActivatableService implements MetricReaderProvider {
 
-    /**
-     * The {@link PrometheusHttpServer} exposing recorded metrics
-     */
-    private MetricReader metricReader;
+    /** The current exporter settings */
+    private PrometheusExporterSettings settings;
 
     public PrometheusExporterService() {
         super("exporters.metrics.prometheus", "metrics.enabled");
@@ -36,19 +34,13 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        PrometheusExporterSettings config = configuration.getExporters().getMetrics().getPrometheus();
+        settings = configuration.getExporters().getMetrics().getPrometheus();
 
         try {
-            String host = config.getHost();
-            int port = config.getPort();
-            metricReader = PrometheusHttpServer.builder()
-                    .setHost(host)
-                    .setPort(port)
-                    .build();
-            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
+            boolean success = openTelemetryController.registerMetricReaderProvider(this, getName());
 
             if (success) {
-                log.info("Starting Prometheus Exporter on {}:{}", host, port);
+                log.info("Starting Prometheus Exporter on {}:{}", settings.getHost(), settings.getPort());
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
@@ -64,5 +56,13 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
         log.info("Stopping Prometheus Exporter");
         openTelemetryController.unregisterMetricExporterService(getName());
         return true;
+    }
+
+    @Override
+    public MetricReader getNewMetricReader() {
+        return PrometheusHttpServer.builder()
+                .setHost(settings.getHost())
+                .setPort(settings.getPort())
+                .build();
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.exporter.MetricReaderProvider;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -165,7 +166,7 @@ class OpenTelemetryControllerImplTest {
             MeterProvider globalMeterProvider = GlobalOpenTelemetry.getMeterProvider();
             // register test service
             registerTestTraceExporterServiceAndVerify(true);
-            // configure OTEL
+            // configure OTel
             assertThat(openTelemetryController.configureOpenTelemetry()).isTrue();
             // tracing should have changed but metrics not
             verify(openTelemetryController, times(1)).configureTracerProvider(any(InspectitConfig.class));
@@ -233,10 +234,10 @@ class OpenTelemetryControllerImplTest {
          * @param expected Whether the registration is expected to succeed.
          */
         private void registerTestMetricExporterServiceAndVerify(boolean expected, boolean clearInvocations) {
-            int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
+            int numRegisteredServices = openTelemetryController.registeredMetricReaderProviders.size();
             assertThat(openTelemetryController.registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName()))
                     .isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricReaders.size())
+            assertThat(openTelemetryController.registeredMetricReaderProviders.size())
                     .isEqualTo(numRegisteredServices + (expected ? 1 : 0));
             verify(openTelemetryController, times(expected ? 1 : 0))
                     .notifyMetricsSettingsChanged();
@@ -251,10 +252,10 @@ class OpenTelemetryControllerImplTest {
          * @param expected Whether the unregistration is expected to succeed.
          */
         private void unregisterTestMetricExporterServiceAndVerify(boolean expected) {
-            int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
+            int numRegisteredServices = openTelemetryController.registeredMetricReaderProviders.size();
             assertThat(openTelemetryController.unregisterMetricExporterService(testMetricsExporterService.getName()))
                     .isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricReaders.size())
+            assertThat(openTelemetryController.registeredMetricReaderProviders.size())
                     .isEqualTo(numRegisteredServices - (expected ? 1 : 0));
             verify(openTelemetryController, times(expected ? 1 : 0))
                     .notifyMetricsSettingsChanged();
@@ -311,31 +312,13 @@ class OpenTelemetryControllerImplTest {
             assertThat(null == GlobalOpenTelemetry.getMeterProvider());
         }
 
-        /**
-         * A noop {@link DynamicallyActivatableService metric exporter service} for testing
-         */
-        class TestMetricsExporterService extends DynamicallyActivatableService {
+        class TestMetricsExporterService implements MetricReaderProvider {
 
+            @Override
             public MetricReader getNewMetricReader() {
                 return PeriodicMetricReader.create(LoggingMetricExporter.create());
             }
 
-            @Override
-            protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-                return false;
-            }
-
-            @Override
-            protected boolean doEnable(InspectitConfig configuration) {
-                return false;
-            }
-
-            @Override
-            protected boolean doDisable() {
-                return false;
-            }
-
-            @Override
             public String getName() {
                 return "test-metrics-exporter-service";
             }

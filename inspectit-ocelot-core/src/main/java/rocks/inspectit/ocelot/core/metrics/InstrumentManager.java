@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.metrics;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.*;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,14 +58,14 @@ public class InstrumentManager {
     /**
      * Updates the instruments defined via {@link MetricsSettings#getDefinitions()}.
      * We should only update the instruments after the OpenTelemetry SDK has been configured.
-     * Otherwise, we will create NOOP-instruments.
      */
     @EventListener
     public void updateInstruments(OpenTelemetryConfiguredEvent event) {
         MetricsSettings metricsSettings = env.getCurrentConfig().getMetrics();
 
         if (event.isSuccess() && metricsSettings.isEnabled()) {
-            Set<String> instrumentsToRemove = processInstrumentUpdates(metricsSettings.getDefinitions());
+            // TODO Maybe we can reuse the existing instruments for the new sdk meter via reflection?
+            Set<String> instrumentsToRemove = processInstrumentUpdates(metricsSettings.getDefinitions(), event.isUpdateMetrics());
             instrumentsToRemove.forEach(this::removeInstrument);
             log.info("Successfully updated OpenTelemetry instruments");
         }
@@ -72,13 +73,14 @@ public class InstrumentManager {
 
     /**
      * Processes the provided metric definitions to update {@link #cachedInstruments} and collects a set of
-     * instrument names, which are no longer required.
+     * instrument names, which are no longer required. <br>
      *
      * @param newDefinitions the new metric definitions
+     * @param forceUpdate if we have to update all existing instruments
      *
      * @return the set of instrument names, which are no longer required
      */
-    public Set<String> processInstrumentUpdates(Map<String, MetricDefinitionSettings> newDefinitions) {
+    public Set<String> processInstrumentUpdates(Map<String, MetricDefinitionSettings> newDefinitions, boolean forceUpdate) {
         Set<String> instrumentsToRemove = new HashSet<>(cachedInstruments.keySet());
 
         newDefinitions.forEach((name, def) -> {
@@ -86,13 +88,12 @@ public class InstrumentManager {
             val currentDef = currentMetricDefinitions.get(name);
 
             boolean instrumentRequired = cachedInstruments.containsKey(name);
-            if (!defWithDefaults.equals(currentDef)) {
+            if (forceUpdate || !defWithDefaults.equals(currentDef)) {
                 instrumentRequired = updateInstrument(name, defWithDefaults);
             }
             if (instrumentRequired) {
                 instrumentsToRemove.remove(name);
             }
-
         });
 
         return instrumentsToRemove;

@@ -278,6 +278,7 @@ class OpenTelemetryControllerImplIntTest extends SpringTestBase {
                 properties.setProperty("inspectit.metrics.definitions." + metricName, metric1)
             );
 
+
             waitAtMost(15, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
                     .untilAsserted(() -> assertThat(applicationEvents.getEvents(OpenTelemetryConfiguredEvent.class))
@@ -294,7 +295,7 @@ class OpenTelemetryControllerImplIntTest extends SpringTestBase {
             waitAtMost(15, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
                     .untilAsserted(() -> assertThat(applicationEvents.getEvents(OpenTelemetryConfiguredEvent.class))
-                            .hasSize(startCount + 1) // unchanged
+                            .anyMatch(event -> !event.isUpdateMetrics())
                     );
         }
 

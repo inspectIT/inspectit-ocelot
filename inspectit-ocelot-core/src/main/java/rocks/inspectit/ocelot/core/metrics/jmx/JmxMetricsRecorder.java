@@ -146,7 +146,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                 .getCopyWithDefaultsPopulated(metricName);
 
         Map<String, MetricDefinitionSettings> metric = Collections.singletonMap(metricName, definitionSettingsWithLastValueView);
-        instrumentManager.processInstrumentUpdates(metric);
+        instrumentManager.processInstrumentUpdates(metric, false);
     }
 
     /**
