@@ -1,29 +1,29 @@
 [versions]
 ioJsonwebtoken = "0.13.0"
-orgEclipseJgit = "7.3.0.202506031305-r"
-orgSpringframeworkBoot = { strictly = "3.5.5" }
-orgSpringframeworkSecurity = "6.5.3"
+orgEclipseJgit = "7.4.0.202509020913-r"
+orgSpringframeworkBoot = { strictly = "3.5.6" }
+orgSpringframeworkSecurity = "6.5.5"
 jsonSchemaGenerator = "4.38.0"
 
 [libraries]
 comGithubVictoolsJsonschemaGenerator = { module = "com.github.victools:jsonschema-generator", version.ref = "jsonSchemaGenerator" }
 comGithubVictoolsJsonschemaModuleJackson = { module = "com.github.victools:jsonschema-module-jackson", version.ref = "jsonSchemaGenerator" }
 comGithubVictoolsJsonschemaModuleJavaxValidation = { module = "com.github.victools:jsonschema-module-javax-validation", version.ref = "jsonSchemaGenerator" }
-comGoogleCodeGson = "com.google.code.gson:gson:2.13.1"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
-comH2databaseH2 = "com.h2database:h2:2.3.232"
+comGoogleCodeGson = "com.google.code.gson:gson:2.13.2"
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.5.0-jre" } }
+comH2databaseH2 = "com.h2database:h2:2.4.240"
 commonsIo = "commons-io:commons-io:2.20.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
-orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.18.0"
+orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.19.0"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.11.2"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.14.0"
 # The class 'org.hibernate.community.dialect.SQLiteDialect' is missing in 7.1.0.Final
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:7.0.6.Final"
-orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11"
+orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13"
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
@@ -37,7 +37,7 @@ orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework
 chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.18"
 chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.18"
 orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.50.3.0"
-orgYamlSnakeyaml = "org.yaml:snakeyaml:2.4"
+orgYamlSnakeyaml = "org.yaml:snakeyaml:2.5"
 
 [bundles]
 jgit = [
