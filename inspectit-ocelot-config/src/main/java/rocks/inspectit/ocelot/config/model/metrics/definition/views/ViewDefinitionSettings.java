@@ -38,7 +38,7 @@ public class ViewDefinitionSettings {
      */
     @NotNull
     @Builder.Default
-    private AggregationType aggregation = AggregationType.LAST_VALUE;
+    private AggregationType aggregation = AggregationType.LAST_VALUE; // TODO We should use the OTel DefaultAggregation for the instrument instead
 
     /**
      * The maximum amount of unique combinations of attributes for this view.

@@ -46,7 +46,10 @@ public class ViewManager {
     @VisibleForTesting
     final Map<String, Map<String, ViewDefinitionSettings>> currentViews = new ConcurrentHashMap<>();
 
-    /** Cached OpenTelemetry views, which should be registered via {@link SdkMeterProviderBuilder}. */
+    /**
+     * Cached OpenTelemetry views, which should be registered via {@link SdkMeterProviderBuilder}.
+     * Will be invalidated for each update.
+     */
     private final Map<InstrumentSelector, View> cachedViews = new ConcurrentHashMap<>();
 
     /**
@@ -137,7 +140,7 @@ public class ViewManager {
      * @return the views which should be registered for OpenTelemetry
      */
     public Map<InstrumentSelector, View> processViews(boolean shouldUpdate) {
-        if (shouldUpdate) {
+        if (shouldUpdate || cachedViews.isEmpty()) {
             resetCollections();
             val activeMetricViews = getActiveMetricViews();
             activeMetricViews.forEach(this::processMetric);
@@ -167,11 +170,12 @@ public class ViewManager {
 
         if (currentViewsForMetric.containsKey(viewName)) {
             ViewDefinitionSettings currentSettings = currentViewsForMetric.get(viewName);
-            updated = updateView(metricName, viewName, currentSettings, newSettings);
+            updated = !currentSettings.equals(newSettings);
         } else {
-            createView(metricName, viewName, newSettings);
             updated = true;
         }
+        // Create new OpenTelemetry view for cache
+        createView(metricName, viewName, newSettings);
 
         if (updated) {
             currentViewsForMetric.put(viewName, newSettings);
@@ -180,7 +184,7 @@ public class ViewManager {
     }
 
     /**
-     * Creates a new view from the provided settings
+     * Creates a new view from the provided settings, which will be cached
      */
     private void createView(String metricName, String viewName, ViewDefinitionSettings settings) {
         if (settings.getAggregation().isTimeWindowAggregation()) {
@@ -190,19 +194,6 @@ public class ViewManager {
             InstrumentSelector selector = createInstrumentSelector(metricName);
             cachedViews.put(selector, view);
         }
-    }
-
-    /**
-     * Creates an updated view from the provided settings, if the settings have changed
-     *
-     * @return true, if the new settings differ from the current ones
-     */
-    private boolean updateView(String metricName, String viewName, ViewDefinitionSettings currentSettings, ViewDefinitionSettings newSettings) {
-        if (!currentSettings.equals(newSettings)) {
-           createView(metricName, viewName, newSettings);
-           return true;
-        }
-        return false;
     }
 
     /**

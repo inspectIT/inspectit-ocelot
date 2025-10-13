@@ -67,6 +67,9 @@ All configuration options for customizing views are given below:
 | `max-buckets`            | `160`                                                                | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The max number of positive buckets and negative buckets                                                                                                                                                                                                                 |
 | `max-scale`              | `20`                                                                 | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The maximum and initial scale.                                                                                                                                                                                                                                          |
 
+>**Runtime updates**: Currently, configurations for metrics and views can be updated during runtime. 
+However, this will also lead to the reset of **all** instruments.
+
 #### Choosing the instrument and aggregation
 
 OpenTelemetry allows only specific combinations of `instrument-type` and `aggregation`. 

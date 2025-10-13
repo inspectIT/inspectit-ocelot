@@ -84,7 +84,7 @@ class JmxMetricsRecorderTest {
 
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "att", null, "desc", value);
 
-            verify(instrumentManager).processInstrumentUpdates(definitionsCaptor.capture());
+            verify(instrumentManager).processInstrumentUpdates(definitionsCaptor.capture(), anyBoolean());
             verify(instrumentManager).tryRecordingMetric(expectedMetricName, value, Baggage.empty());
             verifyNoMoreInteractions(instrumentManager, commonAttributesManager);
 

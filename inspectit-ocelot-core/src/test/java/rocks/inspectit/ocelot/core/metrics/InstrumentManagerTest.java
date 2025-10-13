@@ -65,7 +65,7 @@ class InstrumentManagerTest {
         void shouldCreateInstrument() {
             Map<String, MetricDefinitionSettings> metrics = createDefaultMetric();
 
-            manager.processInstrumentUpdates(metrics);
+            manager.processInstrumentUpdates(metrics, false);
 
             assertThat(manager.isInstrumentRegistered(metricName)).isTrue();
             verify(factory).createInstrument(anyString(), any(MetricDefinitionSettings.class));
@@ -75,7 +75,7 @@ class InstrumentManagerTest {
         void shouldNotCreateInstrumentWhenTimeWindowView() {
             Map<String, MetricDefinitionSettings> metrics = createDefaultTimeWindowMetric();
 
-            manager.processInstrumentUpdates(metrics);
+            manager.processInstrumentUpdates(metrics, false);
 
             assertThat(manager.isInstrumentRegistered(metricName)).isFalse();
             verifyNoInteractions(factory);
@@ -88,6 +88,7 @@ class InstrumentManagerTest {
         @Test
         void shouldRemoveInstrumentWhenConfigurationIsMissing() {
             when(event.isSuccess()).thenReturn(true);
+            when(event.isUpdateMetrics()).thenReturn(false);
             when(env.getCurrentConfig().getMetrics().getDefinitions()).thenReturn(createDefaultMetric());
 
             manager.updateInstruments(event);
@@ -104,6 +105,7 @@ class InstrumentManagerTest {
         @Test
         void shouldRemoveInstrumentWhenChangedToTimeWindowMetric() {
             when(event.isSuccess()).thenReturn(true);
+            when(event.isUpdateMetrics()).thenReturn(false);
             when(env.getCurrentConfig().getMetrics().getDefinitions()).thenReturn(createDefaultMetric());
 
             manager.updateInstruments(event);
@@ -131,7 +133,7 @@ class InstrumentManagerTest {
         void shouldReturnNothingToRemoveWhenCreated() {
             Map<String, MetricDefinitionSettings> metrics = createDefaultMetric();
 
-            Set<String> toBeRemoved = manager.processInstrumentUpdates(metrics);
+            Set<String> toBeRemoved = manager.processInstrumentUpdates(metrics, false);
 
             assertThat(toBeRemoved).isEmpty();
         }
@@ -140,8 +142,8 @@ class InstrumentManagerTest {
         void shouldReturnInstrumentToRemoveWhenConfigurationMissing() {
             Map<String, MetricDefinitionSettings> metrics = createDefaultMetric();
 
-            manager.processInstrumentUpdates(metrics);
-            Set<String> toBeRemoved = manager.processInstrumentUpdates(emptyMap());
+            manager.processInstrumentUpdates(metrics, false);
+            Set<String> toBeRemoved = manager.processInstrumentUpdates(emptyMap(), false);
 
             assertThat(toBeRemoved).isEqualTo(metrics.keySet());
         }
@@ -150,15 +152,15 @@ class InstrumentManagerTest {
         void shouldReturnInstrumentToRemoveWhenChangedToTimeWindowMetric() {
             Map<String, MetricDefinitionSettings> metrics = createDefaultMetric();
 
-            manager.processInstrumentUpdates(metrics);
-            Set<String> toBeRemoved = manager.processInstrumentUpdates(createDefaultTimeWindowMetric());
+            manager.processInstrumentUpdates(metrics, false);
+            Set<String> toBeRemoved = manager.processInstrumentUpdates(createDefaultTimeWindowMetric(), false);
 
             assertThat(toBeRemoved).isEqualTo(metrics.keySet());
         }
 
         @Test
         void shouldReturnNothingToRemoveWhenNothingRegistered() {
-            Set<String> toBeRemoved = manager.processInstrumentUpdates(emptyMap());
+            Set<String> toBeRemoved = manager.processInstrumentUpdates(emptyMap(), false);
 
             assertThat(toBeRemoved).isEmpty();
         }
@@ -168,8 +170,8 @@ class InstrumentManagerTest {
             Map<String, MetricDefinitionSettings> metrics = createDefaultMetric();
             Map<String, MetricDefinitionSettings> changedMetrics = createDefaultMetric(AggregationType.SUM);
 
-            manager.processInstrumentUpdates(metrics);
-            Set<String> toBeRemoved = manager.processInstrumentUpdates(changedMetrics);
+            manager.processInstrumentUpdates(metrics, false);
+            Set<String> toBeRemoved = manager.processInstrumentUpdates(changedMetrics, false);
 
             assertThat(toBeRemoved).isEmpty();
         }
@@ -182,7 +184,7 @@ class InstrumentManagerTest {
 
         @Test
         void shouldRecordValueForRegisteredInstrument() {
-            manager.processInstrumentUpdates(createDefaultMetric());
+            manager.processInstrumentUpdates(createDefaultMetric(), false);
 
             boolean recorded = manager.tryRecordingMetric(metricName, VALUE, Baggage.empty());
 

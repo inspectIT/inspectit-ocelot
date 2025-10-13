@@ -16,28 +16,13 @@ import javax.validation.Valid;
  */
 @Component
 @Slf4j
-public class LoggingMetricExporterService extends DynamicallyActivatableService {
+public class LoggingMetricExporterService extends DynamicallyActivatableService implements MetricReaderProvider {
 
-    /**
-     * The {@link LoggingMetricExporter} for exporting metrics to the log
-     */
-    private LoggingMetricExporter metricExporter;
-
-    /**
-     * The {@link PeriodicMetricReader} for reading metrics to the log
-     */
-    private MetricReader metricReader;
+    /** The current exporter settings */
+    private LoggingMetricsExporterSettings settings;
 
     public LoggingMetricExporterService() {
         super("exporters.metrics.logging", "metrics.enabled");
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-
-        // create new metric exporter
-        metricExporter = LoggingMetricExporter.create();
     }
 
     @Override
@@ -48,12 +33,10 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
+        settings = configuration.getExporters().getMetrics().getLogging();
         try {
-            metricReader = PeriodicMetricReader.builder(metricExporter)
-                    .setInterval(logging.getExportInterval())
-                    .build();
-            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
+            boolean success = openTelemetryController.registerMetricReaderProvider(this, getName());
+
             if (success) {
                 log.info("Starting {}", getName());
             } else {
@@ -76,5 +59,13 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
             log.error("Failed to stop LoggingMetricExporter", e);
             return false;
         }
+    }
+
+    @Override
+    public MetricReader getNewMetricReader() {
+        LoggingMetricExporter exporter = LoggingMetricExporter.create();
+        return PeriodicMetricReader.builder(exporter)
+                .setInterval(settings.getExportInterval())
+                .build();
     }
 }
