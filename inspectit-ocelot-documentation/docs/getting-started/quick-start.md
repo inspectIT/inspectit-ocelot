@@ -7,7 +7,7 @@ You can find and download all released versions of inspectIT Ocelot in our [GitH
 You can get the current version on the following link:
 
 ```bash
-$ wget https://github.com/inspectIT/inspectit-oce/releases/download/{inspectit-ocelot-version}/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar
+$ wget https://github.com/inspectIT/inspectit-ocelot/releases/download/{inspectit-ocelot-version}/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar
 ```
 
 The best way to start using inspectIT Ocelot is to attach the Java agent when starting your Java program.

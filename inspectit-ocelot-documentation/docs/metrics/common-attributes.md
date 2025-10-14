@@ -1,0 +1,56 @@
+---
+id: common-attributes
+title: Common Attributes
+---
+
+inspectIT Ocelot provides a map of common attribute keys and values that are used when recording all metrics.
+This feature enables to "label" metrics collected with inspectIT Ocelot and to share common information about a process or an environment where the process runs.
+The map can be [extended or overwritten by the user](#user-defined-attributes) when this is required.
+
+:::tip
+The common attributes can also be added in tracing spans. This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-attributes).
+:::
+
+Attribute providers are responsible for extracting information from a specific source and provides a map of key value pairs that are then combined into the common baggage.
+Each provider specifies a priority and if the same attribute keys are supplied by two providers, then the attribute value from the provider with higher priority will be used.
+
+inspectIT Ocelot currently supports the following attribute providers:
+
+| Provider                                            | Attributes provided                    | Supports run-time updates | Enabled by default | Priority |
+|-----------------------------------------------------|----------------------------------------|---------------------------|--------------------|----------|
+| [User Defined Attributes](#user-defined-attributes) | -                                      | Yes                       | No                 | HIGH     |
+| [Environment Attributes](#environment-attributes)   | `service.name`, `host.name`, `host.ip` | Yes                       | Yes                | LOW      |
+
+> Runtime updates currently only support changing of an attribute value, but not adding or removing attributes.
+
+## User Defined Attributes
+
+User defined attributes can be added to the common baggage by defining the `inspectit.attributes.extra` property.
+
+* Setting the user defined attributes using properties:
+   ```properties
+   inspectit.attributes.extra.region=us-west-1
+   inspectit.attributes.extra.stage=preprod
+   ```
+
+* Setting the user defined attributes using YAML file:
+   ```YAML
+   inspectit:
+     attributes:
+       extra:
+         region: 'us-west-1'
+         stage: 'preprod'
+   ```
+
+## Environment Attributes
+
+The environment attribute provider extends the common baggage by supplying information about the service and the network host.
+The service is resolved from the `inspectit.service-name` property, while the host information is extracted using `InetAddress.getLocalHost()`.
+
+> On machines that have multiple network interfaces the `InetAddress.getLocalHost()` method might not provide desired values for host related attributes.
+
+| Property                                                          | Default | Description                                                                                       |
+|-------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------|
+| `inspectit.attributes.providers.environment.enabled`              | `true`  | Enables or disables the provider.                                                                 |
+| `inspectit.attributes.providers.environment.resolve-host-name`    | `true`  | If `false`, the attribute `host.name` containing the resolved host name will not be provided.     |
+| `inspectit.attributes.providers.environment.resolve-host-address` | `true`  | If `false`, the attribute `host.ip` containing the resolved host IP address will not be provided. |

@@ -9,8 +9,8 @@ a specific selling order.
 inspectIT Ocelot allows you to link such business transactions with the corresponding data. 
 
 :::note
-This chapter assumes you are already familiar with instrumentation. 
-Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [actions](instrumentation/actions.md) & [rules](instrumentation/rules.md).
+This chapter assumes you are already familiar with instrumentation. Please make sure to read the previous sections about [scopes](instrumentation/scopes.md), [actions](instrumentation/actions.md) & [rules](instrumentation/rules.md).
+
 :::
 
 ## Detecting Business Transactions
@@ -108,9 +108,9 @@ inspectit:
         type:
           name: 'com.example.filter.OrderFilter'
         methods:
-          - name: 'discountOrder'
-          - name: 'regularOrder'
-          - name: 'businessOrder'
+          - name: discountOrder
+          - name: regularOrder
+          - name: businessOrder
             
     rules:
       r_detect_business_transaction_via_scope:
@@ -130,13 +130,13 @@ inspectit:
 Normally, we would like to link one business transaction with multiple data. For instance, we want to include the
 business transaction into attributes of multiple spans. Since we are not able to detect the business transaction 
 at every location we want to create spans, we instead detect the business transaction once and propagate it to other
-locations, where it can be used for attributes or tags.
+locations, where it can be used for attributes.
 
-To enable propagation for your business data, you have to configure the propagation for specific data tags once globally. 
-For instance, we would like to reuse the previously mentioned tag `business_transaction`. 
+To enable propagation for your business data, you have to configure the propagation for specific data keys once globally. 
+For instance, we would like to reuse the previously mentioned attribute `business_transaction`. 
 
-In short, **down propagation** will allow you to use the tag in every rule after the rule, which detected the business transaction.
-**Up propagation** will make the tag available in previous rules as well. 
+In short, **down propagation** will allow you to use the attribute in every rule after the rule, which detected the business transaction.
+**Up propagation** will make the attribute available in previous rules as well. 
 This will be useful, if you cannot detect the business transaction at the entrypoint of your service where for instance
 the root span is created.
 If the business transaction was detected later, because of up propagation you will be able to use it as an attribute 
@@ -149,8 +149,8 @@ inspectit:
   instrumentation:
     data:
       business_transaction: 
-        down-propagation: "GLOBAL"
-        up-propagation: "JVM_LOCAL"
+        down-propagation: GLOBAL
+        up-propagation: JVM_LOCAL
 ```
 
 ## Extending Metrics
@@ -158,29 +158,25 @@ inspectit:
 After detecting the business transaction you are able to include it into your metrics.
 Again, because of the [modularity of rules](instrumentation/rules.md#modularizing-rules) you can create a template
 rule to write business data into metrics. When using propagation, you don't have to include the rule for detecting the
-business transaction in every other rule. Additionally, you should add your business tags to your metric definitions.
+business transaction in every other rule. Additionally, you should add your business attributes to your metric definitions.
 
 ```yaml
 inspectit:
   metrics:
     definitions:
-      '[method/duration]':
+      method_duration:
         unit: ms
         description: 'the duration from method entry to method exit'
+        instrument-type: HISTOGRAM
         views:
-          '[method/duration/sum]':
-            aggregation: SUM
-            tags:
-              'method_name': true
-              'business_transaction': true # business tag
-          '[method/duration/count]':
-            aggregation: COUNT
-            tags:
-              'method_name': true
-              'business_transaction': true # business tag
+          method_duration:
+            aggregation: HISTOGRAM
+            attributes:
+              method_name: true
+              business_transaction: true # business attribute
 ```
 
-After defining your metric you can create a rule, which uses the detected business transaction as tag.
+After defining your metric you can create a rule, which uses the detected business transaction as attribute.
 
 ```yaml
 inspectit:
@@ -191,8 +187,8 @@ inspectit:
         include:
           r_detect_business_transaction: true
         metrics:
-          '[method/duration]':
-            # use business transaction as tag
+          method_duration:
+            # use business transaction as attribute
             data-tags:
               business_transaction: business_transaction
 
