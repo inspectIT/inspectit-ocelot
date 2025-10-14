@@ -13,7 +13,6 @@ If used, the switch makes sure that the inspectIT Ocelot agent:
 * disables all trace exporters
 * removes tracing from all [instrumentation rules](instrumentation/rules.md)
 
-
 ### Global Sampling Rate
 
 It is possible to globally regulate the number of traces generated through [sampling](https://opentelemetry.io/docs/concepts/sampling/).
@@ -50,16 +49,16 @@ You can additionally define the following global properties (`inspectit.tracing`
 :::warning
 These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent restarted.
 :::
-### Common Tags as Attributes
+### Common Attributes
 
-Globally defined [common tags](metrics/common-tags.md) used when recording metrics can also be inserted as attributes in traces.
-The property `inspectit.tracing.add-common-tags` defines the behavior of this feature.
+Globally defined [common attributes](metrics/common-attributes.md) used when recording metrics can also be inserted in traces.
+The property `inspectit.tracing.add-common-attributes` defines the behavior of this feature.
 Available options are:
 
-* `NEVER` - Never add common tags as attributes to spans.
-* `ON_GLOBAL_ROOT` - Add common tags only to a global span root. Thus, only to the first span of each trace.
-* `ON_LOCAL_ROOT` (default) - Add common tags to local span roots. If a trace spans over several JVMs, then attributes will be set on the first span of each JVM.
-* `ALWAYS` - Add common tags as attributes to all spans.
+* `NEVER` - Never add common attributes as attributes to spans.
+* `ON_GLOBAL_ROOT` - Add common attributes only to a global span root. Thus, only to the first span of each trace.
+* `ON_LOCAL_ROOT` (default) - Add common attributes to local span roots. If a trace spans over several JVMs, then attributes will be set on the first span of each JVM.
+* `ALWAYS` - Add common attributes as attributes to all spans.
 
 ### Trace Correlation and Distributed Tracing
 
@@ -87,21 +86,21 @@ Currently, the following formats are supported for sending correlation informati
 It is important to note that this configuration refers to the format of the correlation information used to **send this data**. When processing correlation information that the agent receives, it automatically uses the correct format.
 :::
 
-### Adding Metric Tags
+### Adding Metric Attributes
 
-It is possible to include all metrics tags automatically as tracing attributes for the current [rule](instrumentation/rules.md).
+It is possible to include all metrics attributes automatically as tracing attributes for the current [rule](instrumentation/rules.md).
 This way it isn't necessary to define data keys twice for metrics as well as tracing.
-However, it is only possible to use metric tags as tracing attributes, but not vice versa!
+However, it is only possible to copy metric attributes for tracing, but not vice versa!
 
 This feature is enabled by default. You can disable this feature in the tracing configuration:
 
 ```YAML
 inspectit:
   tracing:
-    add-metric-tags: false
+    add-metric-attributes: false
 ```
 
-In this example, both tags of the metric `my_metric` will be used as attributes for the tracing within this rule.
+In this example, both attributes of the metric `my_metric` will be used as attributes for the tracing within this rule.
 
 ```YAML
 rules:
@@ -110,16 +109,16 @@ rules:
     metrics:
       my_metric:
         data-tags:
-          'example': 'my_data'
+          example: my_data
         constant-tags:
-          'scope': 'EXAMPLE'
+          scope: EXAMPLE
     tracing:
       start-span: true
 ```
 
-Each tag key can only be used once within one trace. Thus, if a tag key has been assigned multiple values within one rule,
-the acquired tag value will be determined hierarchically. Tag keys defined in `metrics.data-tags` will overwrite keys
-defined in `metrics.constant-tags`. Tag keys defined in `tracing.attributes` will always overwrite tag keys defined in `metrics`.
+Each attribute key can only be used once within one trace. Thus, if an attribute key has been assigned multiple values within one rule,
+the acquired attribute value will be determined hierarchically. Attribute keys defined in `metrics.data-tags` will overwrite keys
+defined in `metrics.constant-tags`. Attribute keys defined in `tracing.attributes` will always overwrite attribute keys defined in `metrics`.
 
 ### Using 64-Bit Trace IDs
 
