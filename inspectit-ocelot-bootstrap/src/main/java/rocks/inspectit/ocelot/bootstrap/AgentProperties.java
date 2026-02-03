@@ -17,6 +17,10 @@ public class AgentProperties {
 
     public static final String RECYCLE_JARS_ENV_PROPERTY = "INSPECTIT_RECYCLE_JARS";
 
+    public static final String RECYCLE_JARS_TIMEOUT_PROPERTY = "inspectit.recycle-jars-timeout";
+
+    public static final String RECYCLE_JARS_TIMEOUT_ENV_PROPERTY = "INSPECTIT_RECYCLE_JARS_TIMEOUT";
+
     public static final String INSPECTIT_TEMP_DIR_PROPERTY = "inspectit.temp-dir";
 
     public static final String INSPECTIT_TEMP_DIR_ENV_PROPERTY = "INSPECTIT_TEMP_DIR";
@@ -27,6 +31,7 @@ public class AgentProperties {
     static {
         PROPERTY_NAMES.add(START_DELAY_PROPERTY);
         PROPERTY_NAMES.add(RECYCLE_JARS_PROPERTY);
+        PROPERTY_NAMES.add(RECYCLE_JARS_TIMEOUT_PROPERTY);
         PROPERTY_NAMES.add(INSPECTIT_TEMP_DIR_PROPERTY);
     }
 

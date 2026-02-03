@@ -52,7 +52,8 @@ By default, these files will be created temporarily at runtime.
 Each agent will create these new JAR files for itself inside the temporary directory.
 When you are running multiple agents on the same machine, this would consume additional storage space.
 Thus, you can configure the agent to recycle such JAR files via the system property `inspectit.recycle-jars`
-or the OS environment variable `INSPECTIT_RECYCLE_JARS`.
+or the OS environment variable `INSPECTIT_RECYCLE_JARS`. The timeout for this recycling operation can be set via 
+system property `inspectit.recycle-jars-timeout` or the OS environment variable `INSPECTIT_RECYCLE_JARS_TIMEOUT`
 
 ```
 -Dinspectit.recycle-jars=true
@@ -60,5 +61,13 @@ or the OS environment variable `INSPECTIT_RECYCLE_JARS`.
 
 The agent will look inside ``${temporary-directory}/inspectit-ocelot/{inspectit-ocelot-version}`` for JAR files.
 If no files have been found, the agent will create new ones, which can also be used by other agents.
-**These files will not be deleted after the shutdown of the agent.** Thus, when you are updating your agent version,
+**These files will not be deletfed after the shutdown of the agent.** Thus, when you are updating your agent version,
 you will have to delete the JAR files from the previous version manually.
+
+```
+-Dinspectit.recycle-jars-timeout=3000
+```
+
+During JAR recycling, the agent attempts to lock the JARs during startup. However, when starting multiple JVMs at the 
+same time, it can occur that the JVMs lock each other out, leading to an error. This parameter allows changing
+the timeout of the file lock retry to allow for more retries, making startup more robust. The default is set to 3000ms. 
