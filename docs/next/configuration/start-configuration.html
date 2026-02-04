@@ -95,14 +95,20 @@ By default, these files will be created temporarily at runtime.
 Each agent will create these new JAR files for itself inside the temporary directory.
 When you are running multiple agents on the same machine, this would consume additional storage space.
 Thus, you can configure the agent to recycle such JAR files via the system property <code>inspectit.recycle-jars</code>
-or the OS environment variable <code>INSPECTIT_RECYCLE_JARS</code>.</p>
+or the OS environment variable <code>INSPECTIT_RECYCLE_JARS</code>. The timeout for this recycling operation can be set via
+system property <code>inspectit.recycle-jars-timeout</code> or the OS environment variable <code>INSPECTIT_RECYCLE_JARS_TIMEOUT</code></p>
 <pre><code class="hljs"><span class="hljs-attr">-Dinspectit.recycle-jars</span>=<span class="hljs-literal">true</span>
 </code></pre>
 <p>The agent will look inside <code>${temporary-directory}/inspectit-ocelot/{inspectit-ocelot-version}</code> for JAR files.
 If no files have been found, the agent will create new ones, which can also be used by other agents.
-<strong>These files will not be deleted after the shutdown of the agent.</strong> Thus, when you are updating your agent version,
+<strong>These files will not be deletfed after the shutdown of the agent.</strong> Thus, when you are updating your agent version,
 you will have to delete the JAR files from the previous version manually.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/14/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/logging-configuration"><span class="arrow-prev">← </span><span>Logging Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/configuration/opentelemetry-configuration"><span class="function-name-prevnext">OpenTelemetry Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#delaying-agent-start">Delaying agent start</a></li><li><a href="#changing-temporary-directory">Changing temporary directory</a></li><li><a href="#recycling-jar-files">Recycling JAR files</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<pre><code class="hljs"><span class="hljs-attr">-Dinspectit.recycle-jars-timeout</span>=<span class="hljs-number">3000</span>
+</code></pre>
+<p>During JAR recycling, the agent attempts to lock the JARs during startup. However, when starting multiple JVMs at the
+same time, it can occur that the JVMs lock each other out, leading to an error. This parameter allows changing
+the timeout of the file lock retry to allow for more retries, making startup more robust. The default is set to 3000ms.</p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2/4/2026 by Ariane</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/logging-configuration"><span class="arrow-prev">← </span><span>Logging Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/configuration/opentelemetry-configuration"><span class="function-name-prevnext">OpenTelemetry Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#delaying-agent-start">Delaying agent start</a></li><li><a href="#changing-temporary-directory">Changing temporary directory</a></li><li><a href="#recycling-jar-files">Recycling JAR files</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2026 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
