@@ -5,6 +5,7 @@ import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -144,7 +145,7 @@ public class AgentJars {
 
         try (RandomAccessFile lockFile = new RandomAccessFile(lockPath.toFile(), "rw");
              FileChannel lockChannel = lockFile.getChannel();
-             FileLock lock = acquireLock(lockChannel, 1500, 50)
+             FileLock lock = acquireLock(lockChannel, getJarRecyclingTimeout(), 50)
         ) {
             if (lock == null) throw new IOException("Could not acquire lock for: " + lockPath);
 
@@ -167,9 +168,13 @@ public class AgentJars {
         long end = System.currentTimeMillis() + timeout;
 
         while (System.currentTimeMillis() < end) {
-            FileLock lock = lockChannel.tryLock();
-            if (lock != null) return lock;
-
+            try {
+                FileLock lock = lockChannel.tryLock();
+                if (lock != null) return lock;
+            } catch (OverlappingFileLockException e) {
+                System.err.println("OverlappingFileLock occured." + e);
+                throw new IOException(e);
+            }
             try {
                 Thread.sleep(retryDelay);
             } catch (InterruptedException e) {
@@ -216,6 +221,30 @@ public class AgentJars {
         String isRecyclingEnabledValue = null != System.getProperty(AgentProperties.RECYCLE_JARS_PROPERTY) ?
                 System.getProperty(AgentProperties.RECYCLE_JARS_PROPERTY) : System.getenv(AgentProperties.RECYCLE_JARS_ENV_PROPERTY);
         return "true".equalsIgnoreCase(isRecyclingEnabledValue);
+    }
+
+    /**
+     * If the recycling of jars is enabled, the timeout for the recycling/file locking operation can be set.
+     * The value has to be a non-zero non-negative long, if the conditions are not met, it defaults to 3000ms.
+     *
+     * @return long, either the default of 3000ms or the value of the timeout property
+     */
+    private static long getJarRecyclingTimeout() {
+        String recyclingTimeout = null != System.getProperty(AgentProperties.RECYCLE_JARS_TIMEOUT_PROPERTY) ?
+                System.getProperty(AgentProperties.RECYCLE_JARS_TIMEOUT_PROPERTY) : System.getenv(AgentProperties.RECYCLE_JARS_TIMEOUT_ENV_PROPERTY);
+
+        final long DEFAULT_RECYCLE_TIMEOUT = 3000;
+
+        if (recyclingTimeout == null) return DEFAULT_RECYCLE_TIMEOUT;
+
+        try {
+            long recyclingTimeoutLong = Long.parseUnsignedLong(recyclingTimeout);
+            if (recyclingTimeoutLong <= 0) throw new NumberFormatException();
+            return recyclingTimeoutLong;
+        } catch (NumberFormatException nfe) {
+            System.err.println("Jar Recycling Timeout property must be a non-negative non-zero long, therefore reverting to default timeout of 3000ms.");
+            return DEFAULT_RECYCLE_TIMEOUT;
+        }
     }
 
     /**

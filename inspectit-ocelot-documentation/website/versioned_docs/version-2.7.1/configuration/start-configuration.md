@@ -1,6 +1,7 @@
 ---
-id: start-configuration
+id: version-2.7.1-start-configuration
 title: Start Configuration
+original_id: start-configuration
 ---
 
 There are some properties to configure the start procedure of the agent. These properties can only be
@@ -23,7 +24,7 @@ and continue as if there was no value supplied.
 Example using system property:
 ```bash
 # this will delay the instrumentation process by 10 minutes
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" \
+$ java -javaagent:"/path/to/inspectit-ocelot-agent-2.7.1.jar" \
    -Dinspectit.start.delay=600000 \
    -jar my-java-program.jar
 ```
@@ -32,7 +33,7 @@ Example using OS environment variable (using bash):
 ```bash
 # this will delay the instrumentation process by 5 minutes
 $ export INSPECTIT_START_DELAY=300000
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" -jar my-java-program.jar
+$ java -javaagent:"/path/to/inspectit-ocelot-agent-2.7.1.jar" -jar my-java-program.jar
 ```
 
 ## Changing temporary directory
@@ -52,22 +53,21 @@ By default, these files will be created temporarily at runtime.
 Each agent will create these new JAR files for itself inside the temporary directory.
 When you are running multiple agents on the same machine, this would consume additional storage space.
 Thus, you can configure the agent to recycle such JAR files via the system property `inspectit.recycle-jars`
-or the OS environment variable `INSPECTIT_RECYCLE_JARS`. The timeout for this recycling operation can be set via 
-system property `inspectit.recycle-jars-timeout` or the OS environment variable `INSPECTIT_RECYCLE_JARS_TIMEOUT`
+or the OS environment variable `INSPECTIT_RECYCLE_JARS`.
 
 ```
 -Dinspectit.recycle-jars=true
 ```
 
-The agent will look inside ``${temporary-directory}/inspectit-ocelot/{inspectit-ocelot-version}`` for JAR files.
+The agent will look inside ``${temporary-directory}/inspectit-ocelot/2.7.1`` for JAR files.
 If no files have been found, the agent will create new ones, which can also be used by other agents.
-**These files will not be deletfed after the shutdown of the agent.** Thus, when you are updating your agent version,
+**These files will not be deleted after the shutdown of the agent.** Thus, when you are updating your agent version,
 you will have to delete the JAR files from the previous version manually.
 
 ```
 -Dinspectit.recycle-jars-timeout=3000
 ```
 
-During JAR recycling, the agent attempts to lock the JARs during startup. However, when starting multiple JVMs at the 
+During JAR recycling, the agent attempts to lock the JARs during startup. However, when starting multiple JVMs at the
 same time, it can occur that the JVMs lock each other out, leading to an error. This parameter allows changing
 the timeout of the file lock retry to allow for more retries, making startup more robust. The default is set to 3000ms. 
