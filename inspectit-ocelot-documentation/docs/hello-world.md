@@ -20,5 +20,5 @@ Thus, combining different open source tools you can come to the desired APM solu
 
 ![Possible landscape with inspectIT Ocelot and other open source tools](assets/inspectit-ocelot-landscape.png)
 
-It's important to mention that inspectIT Ocelot seamlessly integrates with the OpenTelemetry (or OpenCensus) library if it is used in your application.
+It's important to mention that inspectIT Ocelot seamlessly integrates with the OpenTelemetry library if it is used in your application.
 The data collected by your manual source code instrumentation will be combined with everything that the agent collects as well.

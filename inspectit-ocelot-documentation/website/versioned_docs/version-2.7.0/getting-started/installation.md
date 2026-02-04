@@ -1,14 +1,15 @@
 ---
-id: installation
+id: version-2.7.0-installation
 title: Installation
+original_id: installation
 ---
 
 This section describes the installation details for the inspectIT Ocelot agent.
 
 ## Supported Java Runtime Environments
 
-The inspectIT Ocelot supports Java Runtime Environments in **version 1.8.0 and above**. You will not be able to use the agent with the lower Java versions.
-The agent works with different JRE distributions including Oracle, openJDK, IBM, Azul, etc.
+The inspectIT Ocelot supports Java Runtime Environments in version 1.8.0 and above. You will not be able to use the agent with the lower Java versions.
+The agent works with different JRE distributions including Oracle, openJDK, Azul, etc.
 
 It is recommended to always use the latest minor release of your current Java Runtime Environment version in order to ensure straightforward operation.
 
@@ -18,7 +19,7 @@ The best option for using the inspectIT Ocelot is to include it to the start of 
 This way the agent will be initialized before your application starts.
 
 ```bash
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" -jar my-java-program.jar
+$ java -javaagent:"/path/to/inspectit-ocelot-agent-2.7.0.jar" -jar my-java-program.jar
 ```
 
 > Some application servers have dedicated scripts that are used to launch the actual JVM that runs the application. In such cases, you must alter the start-up scripts in order to instrument the correct JVM.
@@ -31,12 +32,12 @@ In such a scenario the collection of metrics and traces will start from the poin
 The attaching can easily be done using the agent itself and executing the following command:
 
 ```bash
-$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar <PID> [<AGENT_ARGUMENTS>]
+$ java -jar inspectit-ocelot-agent-2.7.0.jar <PID> [<AGENT_ARGUMENTS>]
 ```
 
 In the following example, we are attaching the agent to the JVM process `1337` and passing some [additional arguments](configuration/configuration-sources.md#java-agent-arguments) to it:
 ```bash
-$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
+$ java -jar inspectit-ocelot-agent-2.7.0.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
 ```
 
 > The agent is internally using the utility [jattach](https://github.com/apangin/jattach) for attaching itself to a running JVM.
@@ -52,11 +53,11 @@ $ jcmd -l
 Another way of attaching the agent to a running JVM is to use the utility [jattach](https://github.com/apangin/jattach):
 
 ```bash
-$ ./jattach.sh <PID> load instrument false /path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar='{"inspectit.service-name" : "MyService"}'
+$ ./jattach.sh <PID> load instrument false /path/to/inspectit-ocelot-agent-2.7.0.jar='{"inspectit.service-name" : "MyService"}'
 ```
 In this example we're also passing [JSON arguments](configuration/configuration-sources.md#java-agent-arguments) to the agent in order to configure its service name.
 
-> Using the attach options has some limitations with respect to using the OpenTelemetry instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenTelemetry Configuration](configuration/opentelemetry-configuration.md) section to understand these limitations.
+> Using the attach options has some limitations with respect to using the OpenCensus instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenCensus Configuration](configuration/open-census-configuration.md) section to understand these limitations.
 
 ## Using the Agent With a Security Manager
 

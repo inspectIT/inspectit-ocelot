@@ -1,6 +1,6 @@
 ---
 id: tracing
-title: Collecting Tracing
+title: Collecting Traces
 ---
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) with the help
@@ -14,7 +14,7 @@ Afterward you can define that all methods matching a certain rule will be traced
 inspectit:
   instrumentation:
     rules:
-      'r_example_rule':
+      r_example_rule:
         tracing:
           start-span: true
 ```
@@ -38,12 +38,12 @@ This behaviour can be customized using the `name` property:
 inspectit:
   instrumentation:
     rules:
-      'r_servlet_api_service':
+      r_servlet_api_service:
         tracing:
           start-span: true
           name: 'http_path'
         entry:
-          'http_path':
+          http_path:
            #... action call to fetch the http path here
 ```
 
@@ -61,10 +61,10 @@ This can be configured using the `sample-probability` and `sample-mode` setting 
 inspectit:
   instrumentation:
     rules:
-      'r_servlet_api_service':
+      r_servlet_api_service:
         tracing:
           start-span: true
-          sample-probability: '0.2'
+          sample-probability: 0.2
           sample-mode: PARENT_BASED
 ```
 
@@ -91,13 +91,13 @@ The example below shows how you can define attributes:
 inspectit:
   instrumentation:
     rules:
-      'r_servlet_api_service':
+      r_servlet_api_service:
         tracing:
-          start-span: 'true'
+          start-span: true
           attributes:
-            'http_host': 'host_name'
+            http_host: host_name
         entry:
-          'host_name':
+          host_name:
            #... action call to fetch the http host here
 ```
 
@@ -106,8 +106,8 @@ After the rule's exit phase, the corresponding data keys are read and attached a
 
 Note that if a rule does not start or continue a span, no attributes will be written.
 
-The [common tags](metrics/common-tags.md) are added as attributes in all local span roots by default.
-This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
+The [common attributes](metrics/common-attributes.md) are added in all local span roots by default.
+This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-attributes).
 
 ## Visualizing Span Errors
 
@@ -120,7 +120,7 @@ This is done via the `error-status` configuration property of a rule's tracing s
 inspectit:
   instrumentation:
     rules:
-      'r_example_rule':
+      r_example_rule:
         tracing:
           start-span: true
           error-status: _thrown
@@ -142,19 +142,19 @@ It is possible to conditionalize the span starting as well as the attribute writ
 inspectit:
   instrumentation:
     rules:
-      'r_span_starting_rule':
+      r_span_starting_rule:
         tracing:
           start-span: true
           start-span-conditions:
-            only-if-true: 'my_condition_data'
+            only-if-true: my_condition_data
 #....
-      'r_attribute_writing_rule':
+      r_attribute_writing_rule:
         tracing:
           attributes:
-            'attrA': 'data_a'
-            'attrB': 'data_b'
+            attrA: data_a
+            attrB: data_b
           attribute-conditions:
-            only-if-true: 'my_condition_data'
+            only-if-true: my_condition_data
 ```
 
 If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
@@ -183,13 +183,13 @@ To enable it you can simply add the `auto-tracing` setting:
 inspectit:
   instrumentation:
     rules:
-      'r_example_rule':
+      r_example_rule:
         tracing:
           start-span: true
           auto-tracing: true
 ```
 
-When auto-tracing is enabled, callees of the method will be traced by periodically capturing stack traces.
+When auto-tracing is enabled, callers of the method will be traced by periodically capturing stack traces.
 Methods recorded via auto-tracing will be marked in the traces by a leading asterisk.
 
 You can also set the `auto-tracing` option to `false`, which disables auto-tracing for the methods affected by this rule.
@@ -225,7 +225,7 @@ Firstly, it is possible to "remember" the span created or continued using the `s
 
 ```yaml
     rules:
-      'r_span_starting_rule':
+      r_span_starting_rule:
         tracing:
           start-span: true
           store-span: 'my_span_data'
@@ -240,17 +240,17 @@ By setting `end-span` to false, the span is kept open instead. It can then be co
 
 ```yaml
     rules:
-      'r_span_finishing_rule':
+      r_span_finishing_rule:
         tracing:
-          continue-span: 'my_span_data'
+          continue-span: my_span_data
           end-span: true # actually not necessary as it is the default value
 ```
 
 Methods instrumented with this rule will not create a new span. 
 Instead, at the end of the entry phase the data for the key `my_span_data` is read from the context. 
 If it contains a valid span written via `store-span`, this span is continued in this method. 
-This implies that all spans started by callees of this method will appear as children of the span stored in `my_span_data`. 
-+In addition, this rule also then causes the continued span to end with the execution of the method due to the `end-span` option. 
+This implies that all spans started by callers of this method will appear as children of the span stored in `my_span_data`. 
+In addition, this rule also then causes the continued span to end with the execution of the method due to the `end-span` option. 
 This is not required to happen: a span can be continued by any number of rules before it is finally ended.
 
 It also is possible to define rules for which both `start-span` and `continue-span` is configured.

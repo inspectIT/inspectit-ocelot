@@ -1,25 +1,26 @@
 ---
-id: opentelemetry-configuration
-title: Using OpenTelemetry with inspectIT Ocelot
+id: version-2.7.0-opentelemetry-configuration
+title: Using OpenTelemetry Library with inspectIT Ocelot
 sidebar_label: OpenTelemetry Configuration
+original_id: opentelemetry-configuration
 ---
 
 If you plan to use the OpenTelemetry library in an application which will be instrumented later on with inspectIT Ocelot, 
 some special rules do apply.
-Following these rules will make sure that there are no runtime problems in your application.
+Following these rules will make sure that there are no run-time problems in your application.
 Furthermore, a correct configuration will make it possible to combine metrics and traces that you manually collect 
 using the OpenTelemetry instrumentation library with the ones collected by the inspectIT Ocelot agent.
 
 1. Make sure you are using the same version of OpenTelemetry as inspectIT Ocelot.
    
-   The inspectIT Ocelot agent in version {inspectit-ocelot-version} internally uses OpenTelemetry in version 
-   {opentelemetry-version}. Please adapt any OpenTelemetry dependency in your application to this version to avoid runtime conflicts.
+   The inspectIT Ocelot agent in version 2.7.0 internally uses OpenTelemetry in version 
+   1.53.0. Please adapt any OpenTelemetry dependency in your application to this version to avoid runtime conflicts.
    
    ```XML
    <dependency>
        <groupId>io.opentelemetry</groupId>
        <artifactId>opentelemetry-api</artifactId>
-       <version>{opentelemetry-version}</version>
+       <version>1.53.0</version>
    </dependency>
    ```
 
@@ -43,5 +44,4 @@ using the OpenTelemetry instrumentation library with the ones collected by the i
 
    It is important to state that the agent will *not* publish the OpenTelemetry classes to the bootstrap classloader 
    if it is attached during runtime – even if the previously mentioned JVM argument is set! 
-   In this case, metrics and traces of *manual OpenTelemetry instrumentation* of the application will *not* be 
-   collected by the inspectIT Ocelot agent.
+   In this case, metrics and traces of *manual OpenTelemetry instrumentations* will *not* be collected by the inspectIT Ocelot agent.

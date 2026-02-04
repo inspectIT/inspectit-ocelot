@@ -3,7 +3,7 @@ id: plugin-configuration
 title: Plugin Configuration
 ---
 
-There are more OpenCensus exporters available than the ones we have included with inspectIT Ocelot.
+There are more exporters available than the ones we have included with inspectIT Ocelot.
 This decision was made so that we can keep the size and amount of dependencies of the agent small. 
 For this reason, we introduced a plugin system allowing you to add and configure additional exporters.
 

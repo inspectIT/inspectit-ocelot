@@ -19,7 +19,7 @@
       "metrics/metrics",
       "metrics/metric-recorders",
       "metrics/metric-exporters",
-      "metrics/common-tags",
+      "metrics/common-attributes",
       "metrics/custom-metrics",
       "metrics/self-monitoring",
       "metrics/tag-guard"
@@ -52,7 +52,9 @@
     "End User Monitoring": [
       "enduser-monitoring/enduser-monitoring-server",
       "enduser-monitoring/eum-server-setup",
-      "enduser-monitoring/eum-server-configuration",
+      "enduser-monitoring/eum-server-metrics",
+      "enduser-monitoring/eum-server-tracing",
+      "enduser-monitoring/eum-server-security",
       "enduser-monitoring/install-eum-agent"
     ],
     "Configuration Server": [
@@ -70,6 +72,6 @@
       "config-server/status-table-view",
       "config-server/alerting"
     ],
-    "Breaking Changes": ["breaking-changes/Breaking Changes"]
+    "Breaking Changes": ["breaking-changes/breaking-changes"]
   }
 }

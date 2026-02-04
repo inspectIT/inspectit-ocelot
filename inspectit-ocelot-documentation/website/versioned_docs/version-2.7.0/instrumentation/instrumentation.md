@@ -1,6 +1,7 @@
 ---
-id: instrumentation
+id: version-2.7.0-instrumentation
 title: Instrumentation
+original_id: instrumentation
 ---
 This section describes how the inspectIT Ocelot Java agent can be used to inject predefined or custom monitoring code into the target application.
 
@@ -37,11 +38,10 @@ inspectit:
 ```
 
 :::note
-Metrics which are not based on instrumentation like e.g. JVM internals (thread statistics, memory statistics, ...) are **not affected** by this option.
+Metrics which are not based on instrumentations like e.g. JVM internals (thread statistics, memory statistics, ...) are **not affected** by this option.
 :::
 
 ## Naming Convention
-
 Differentiating between rules, actions and scopes as well as differentiating between keys and values
 in the configuration can be tricky from time to time.
 Therefore, to increase readability of your configuration files the following naming convention is recommended:
@@ -49,6 +49,10 @@ Therefore, to increase readability of your configuration files the following nam
 * Scope names always start with `s_`, e.g. `s_my_scope`.
 * Action names always start with `a_`, e.g. `a_my_action`.
 * Rule names always start with `r_`, e.g. `r_my_rule`.
-* Field names should be written in **snake case**, e.g. `s_my_scope`.
-* If you want to use dots for field names, the names have to be enclosed by `'[]'`, e.g. `'[my.metric]'`.
-  Otherwise, this might lead to configuration errors because of the yaml syntax.
+* Fields which are defined by the user should be put in single quotations marks, e.g. `input: 'my_input'`. 
+* This rule also applies to keys which can be entirely defined by the user, for example when defining the name of a 
+  custom action or attribute names.
+* Field names should be written in **snake case**, e.g. `s_my_scope`. **Do not use** dots instead of underscores, since
+  this will create a _nested structure_ in yaml and might lead to configuration errors.
+
+These naming conventions are used both in this documentation and the default configuration provided.

@@ -1,167 +1,8 @@
 ---
-id: breaking-changes
+id: version-2.7.0-Breaking Changes
 title: Breaking Changes
+original_id: Breaking Changes
 ---
-
-## Breaking changes in 3.0.0
-
-### Full integration of native OpenTelemetry
-
-Starting with the current release, inspectIT Ocelot fully migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry).
-OpenCensus has been completely replaced by OpenTelemetry within the **Java agent** as well as the **EUM server**.
-
-### Updated metrics
-
-#### Updated metric definition
-
-By switching to OpenTelemetry metrics, the configuration model for [metrics](metrics/custom-metrics.md#metrics) and 
-[views](metrics/custom-metrics.md#views) have changed. The metrics property `type` has been updated to `value-type`.
-Additionally, there is an option `instrument-type`, which defines the OpenTelemetry [instrument](https://opentelemetry.io/docs/languages/java/api/#meter)
-to use for recording the metric. Currently, we only support synchronous instruments like `COUNTER`, `UP_DOWN_COUNTER`,
-`GAUGE` or `HISTOGRAM`.
-
-The aggregations for views have also changed. There is no more `COUNT` aggregation. 
-Instead, you can use the `SUM` aggregation or the count field of the `HISTOGRAM` aggregation.
-For this reason, all default metrics containing a `COUNT` and `SUM` view have been updated with only one `HISTOGRAM` view,
-which still provides fields for count and sum values.
-There is also a new aggregation `EXPONENTIAL_HISTOGRAM`, which allows to record [base2 exponential buckets for histograms](https://opentelemetry.io/docs/specs/otel/metrics/sdk/#base2-exponential-bucket-histogram-aggregation).
-Furthermore, the Java agent also supports the custom `SMOOTHED_AVERAGE` aggregation for views, which was only
-supported by the EUM server previously. There are some other new options, which are mentioned in the [views](metrics/custom-metrics.md#views) section.
-
-Another change involves the metric output of inspectIT. Since the [metric data model](https://opentelemetry.io/docs/specs/otel/metrics/data-model/) has changed, it will probably be necessary
-to update dashboards or database configurations.
-
-#### Updated metric names
-
-With this version we are also updating our naming conventions for metrics. Instead of slashes `/`, we will start
-to use underscores `_`. Thus, metrics like `method/duration` have been renamed to `method_duration`.
-This involves all [self-monitoring](metrics/self-monitoring.md) metrics like `inspectit_self_instrumented_classes`, 
-default [metrics recorders](metrics/metric-recorders.md) like `system_cpu_usage` 
-and all metrics from the [default instrumentation](default-instrumentation/default-instrumentation.md) like `http_in_responsetime`.
-
-Furthermore, OpenTelemetry does not use the term _tag_ for metric labels like OpenCensus, but instead they use _attributes_.
-Thus, we have updated several configuration options to comply with the OpenTelemetry language.
-Metric views no longer contain `tags`, but `attributes`. There are no _common tags_, but _common attributes_ and so on.
-However, sometimes we still refer to tags, e.g. `tag-guard` or `data-tags` in rules.
-Basically, tags and attributes reference the same concept of data labeling.
-
-### InfluxDB exporter removed
-
-Since the previous InfluxDB exporter was specifically designed for OpenCensus,
-due to the migration to OpenTelemetry the exporter was fully removed. Please use the other exporters instead.
-
-### Migration guide for 3.0.0
-
-#### 1. Update configuration
-
-##### Metric names in rules
-
-All default metric names have been updated and use underscores `_` instead of slashes `/`.
-Thus, if such metrics are referenced inside a rule, the rule has to be updated. Note that the entire default instrumentation
-has already been updated to use the new metric names.
-
-```yaml
-inspectit.instrumentation.rules:
-  r_example:
-    exit:
-      my-value:
-        # ...
-    metrics:
-      http_in_responsetime: # previously http/in/responsetime
-        value: my-value
-
-```
-
-##### Common attributes
-
-Common attributes (previously common tags) are no longer configured via `inspectit.tags`, but
-`inspectit.attributes`. For example:
-
-```properties
-inspectit.attributes.extra.region=us-west-1
-inspectit.attributes.extra.stage=preprod
-inspectit.attributes.providers.environment.enabled=true
-```
-
-##### Tracing
-
-Some tracing options have been renamed as well:
-
-```yaml
-inspectit:
-  tracing:
-    add-metric-attributes: true # previously add-metric-tags
-    add-common-attributes: true # previously add-common-tags
-```
-
-##### Tag-Guard
-
-Some Tag-Guard options have been renamed as well:
-
-```yaml
-inspectit.metrics:
-    tag-guard:
-      max-values-per-attribute: 1000       # previously max-values-per-tag
-      max-values-per-attribute-by-metric:  # previously max-values-per-tag-by-measure
-        my_metric: 200
-```
-
-##### Data propagation
-
-The propagation behaviour of data keys `inspectit.instrumentation.data` no longer contains the property `is-tag`.
-Inside OpenTelemetry baggage (previously OpenCensus TagContext) all data is usable for metrics or traces and
-can be propagated if the data key was properly configured.
-
-#### 2. Update metric definitions
-
-The configuration model for metrics and views has slightly changed. 
-Thus, metric definitions have to be updated. The option `type` has to be updated to `value-type` for all metrics.
-The value `LONG` and `DOUBLE` are still valid. If no `value-type` is specified, the metric will use `LONG` by default.
-Additionally, an `instrument-type` has to be specified. If no `instrument-type` is specified, the metric will
-use `GAUGE` by default. There is an official [guideline](https://opentelemetry.io/docs/specs/otel/metrics/supplementary-guidelines/) to help you to choose the proper instrument.
-
-```yaml
-inspectit.metrics.definitions:
-  my_metric:                    # previously my/metric (most likely)
-    unit: ms
-    value-type: DOUBLE          # previously type
-    instrument-type: HISTOGRAM  # new property, by default GAUGE
-    views:
-      # ...
-```
-
-Furthermore, the view configurations have to be updated as well. There is no longer any `COUNT` aggregation.
-Thus, if you have defined two views with `COUNT` and `SUM` aggregation previously, now you define one single
-`HISTOGRAM` view, which will also offer fields for count and sum values. If no aggregation is specified for a view,
-Additionally, the options involving attributes (previously tags) have been renamed to `attributes` 
-and `with-common-attributes`. There are also some new view options, which are optional.
-
-```yaml
-inspectit.metrics.definitions:
-  my_metric:                  
-    # ...
-    views:
-      my_metric:                     # previously two views: my/metric/count and my/metric/sum (most likely)
-        aggregation: HISTOGRAM
-        with-common-attributes: true # previously with-common-tags
-        attributes:                  # previously tags
-          my-attr: true
-```
-
-#### 3. Replace InfluxDB exporter
-
-Even tough inspectIT Ocelot does no longer offer a dedicated InfluxDB exporter, there a plenty other options to
-export metrics to InfluxDB.
-
-First, there is a [Prometheus Input Plugin](https://github.com/influxdata/telegraf/blob/master/plugins/inputs/prometheus/README.md) 
-for [Telegraf](https://github.com/influxdata/telegraf/tree/master), which is able to gather metrics from a Prometheus endpoint.
-You can enable the [Prometheus exporter](metrics/metric-exporters.md#prometheus-exporter) of inspectIT Ocelot and collect metrics via Telegraf from the configured endpoint.
-After that, Telegraf can further send the metrics to InfluxDB.
-
-Another alternative would be to use the [InfluxDB Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/influxdbexporter/README.md) 
-of the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib). 
-You can export metrics via the [OTLP exporter](metrics/metric-exporters.md#otlp-exporter-metrics) to the OTel collector. 
-After that, the collector will further send the metrics to InfluxDB.
 
 ## Breaking changes in 2.7.0
 
@@ -172,7 +13,7 @@ The agent does no longer expose an API to read or write data tags. Furthermore, 
 was removed for data keys.
 
 The exchange of data tags with remote services - including browsers - is still possible via propagation 
-of the [Baggage](instrumentation/data-propagation.md#http-baggage) header.
+of the [Baggage](instrumentation/data-propagation.md#baggage) header.
 Tags can still can be [stored for sessions](instrumentation/data-propagation.md#session-storage) by enabling `session-storage` for specific data keys.
 
 ### Configuration Server requires Java 21
@@ -605,7 +446,7 @@ inspectit:
 
 As these definitions could be easily forgotten, we changed the default behaviour of data:
 It now does *not* propagate and is *not* used as a tag automatically. The exception hereby
-is (a) if the data is a [common tag](metrics/common-attributes.md) or (b) the data is used as a tag in any
+is (a) if the data is a [common tag](metrics/common-tags.md) or (b) the data is used as a tag in any
 [metric definition](metrics/custom-metrics.md). Common Tags default to JVM_LOCAL down propagation and being a tag.
 When a data_key is also used as a tag in a metric definition, it defaults to being a tag but the propagation is not affected.
 You can still freely override the behaviour by configuring the settings for your data under `inspectit.instrumentation.data`.

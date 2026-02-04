@@ -15,9 +15,9 @@ Scopes are defined under the configuration key `inspectit.instrumentation.scopes
 inspectit:
   instrumentation:
     scopes:
-      's_my_scope':
+      s_my_scope:
         # SCOPE_DEFINITION
-      's_another_scope':
+      s_another_scope:
         # SCOPE_DEFINITION
 ```
 
@@ -77,11 +77,11 @@ As shown in the previous code-snippet, the scope definition contains multiple ty
 
 A type matcher consists of the following attributes:
 
-|Attribute|Default|Description
-|---|---|---|
-|`name`| -| The name or pattern which is used to match against the fully qualified class or interface name.
-|`matcher-mode`| `EQUALS_FULLY`| The matching mode. Possible values: `EQUALS_FULLY`, `MATCHES` (see [String.match](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String)), `STARTS_WITH`, `STARTS_WITH_IGNORE_CASE`, `CONTAINS`, `CONTAINS_IGNORE_CASE`, `ENDS_WITH`, `ENDS_WITH_IGNORE_CASE`, `NOT_EQUALS_FULLY`, `NOT_EQUALS_FULLY_IGNORE_CASE`
-|`annotations`|-| A list of matchers used for matching annotations. Each annotation matcher consists of a `name` and `matcher-mode` which are equivalent to the ones above.
+| Attribute      | Default        | Description                                                                                                                                                                                                                                                                                                                                          |
+|----------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`         | -              | The name or pattern which is used to match against the fully qualified class or interface name.                                                                                                                                                                                                                                                      |
+| `matcher-mode` | `EQUALS_FULLY` | The matching mode. Possible values: `EQUALS_FULLY`, `MATCHES` (see [String.match](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String)), `STARTS_WITH`, `STARTS_WITH_IGNORE_CASE`, `CONTAINS`, `CONTAINS_IGNORE_CASE`, `ENDS_WITH`, `ENDS_WITH_IGNORE_CASE`, `NOT_EQUALS_FULLY`, `NOT_EQUALS_FULLY_IGNORE_CASE` |
+| `annotations`  | -              | A list of matchers used for matching annotations. Each annotation matcher consists of a `name` and `matcher-mode` which are equivalent to the ones above.                                                                                                                                                                                            |
 
 :::caution
 `NOT_EQUALS_FULLY` and `NOT_EQUALS_FULLY_IGNORE_CASE` are disabled by default for **type matchers** (but enabled for method matchers) as this will result in too many instrumented classes.
@@ -104,12 +104,12 @@ The matcher used to determine whether a method is affected by a certain scope co
 
 Besides `name`, `matcher-mode` and `annotations`, the method matcher contains the following attributes:
 
-|Attribute|Default|Description
-|---|---|---|
-|`visibility`| [PUBLIC, PROTECTED, PACKAGE, PRIVATE]| A list of visibility modifiers. The target method has to use one of the specified modifiers. Possible values: `PUBLIC`, `PROTECTED`, `PACKAGE`, `PRIVATE`
-|`arguments`|-| A list of fully qualified class names representing the method's arguments.
-|`is-synchronized`|-| Specifies whether the target method is synchronized.
-|`is-constructor`|`false`| Specifies whether the target method is a constructor. If this value is `true`, the `name` and `is-synchronized` attribute will *not* be used!
+| Attribute         | Default                               | Description                                                                                                                                               |
+|-------------------|---------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `visibility`      | [PUBLIC, PROTECTED, PACKAGE, PRIVATE] | A list of visibility modifiers. The target method has to use one of the specified modifiers. Possible values: `PUBLIC`, `PROTECTED`, `PACKAGE`, `PRIVATE` |
+| `arguments`       | -                                     | A list of fully qualified class names representing the method's arguments.                                                                                |
+| `is-synchronized` | -                                     | Specifies whether the target method is synchronized.                                                                                                      |
+| `is-constructor`  | `false`                               | Specifies whether the target method is a constructor. If this value is `true`, the `name` and `is-synchronized` attribute will *not* be used!             |
 
 The following example will match against all methods which are exactly named `contains`, use the `PUBLIC` visibility modifier, have exactly one argument which is a `java.lang.Object`, are not synchronized and are annotated by the annotation `any.Annotation`.
 
@@ -129,10 +129,10 @@ is-constructor: false
 
 The scope definition's advanced settings contains currently the following two attributes:
 
-|Attribute|Default|Description
-|---|---|---|
-|`instrument-only-inherited-methods`| false | If this value is `true`, only methods will be instrumented which are inherited of a superclass or interface which were specified in the `interfaces` or `superclass` configuration.
-|`disable-safety-mechanisms`| false | By default, the agent will not allow scopes containing only "any-matcher" like `MATCHES(*)`. If required, this safety feature can be disabled by setting this value to `true`.
+| Attribute                           | Default | Description                                                                                                                                                                         |
+|-------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `instrument-only-inherited-methods` | false   | If this value is `true`, only methods will be instrumented which are inherited of a superclass or interface which were specified in the `interfaces` or `superclass` configuration. |
+| `disable-safety-mechanisms`         | false   | By default, the agent will not allow scopes containing only "any-matcher" like `MATCHES(*)`. If required, this safety feature can be disabled by setting this value to `true`.      |
 
 ## Example Scope Definition
 
@@ -144,7 +144,7 @@ inspectit:
   instrumentation:
         scopes:
           # the id of the following defined scope element - this example scope targets the ArrayList's contains method
-          's_example_list_scope':
+          s_example_list_scope:
             # interfaces which have to be implemented
             interfaces:
               - name: 'java.util.List'
@@ -188,5 +188,5 @@ inspectit:
               disable-safety-mechanisms: false
             # exclude the methods from the specified scope
             exclude:
-              's_to_be_exclude': true
+              s_to_be_exclude: true
 ```

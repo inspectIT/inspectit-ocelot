@@ -1,6 +1,7 @@
 ---
-id: data-propagation
+id: version-2.7.0-data-propagation
 title: Data Propagation
+original_id: data-propagation
 ---
 
 We can collect any amount of data in both the entry and the exit section of an instrumented method. 
@@ -15,7 +16,7 @@ This dictionary is called **inspectIT context**.
 If the _inspectIT context_ was truly implemented as explained above, all data would be only visible in the method where it was collected. 
 This however often is not the desired behaviour.
 Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there. 
-You now of course want this data to be used as attribute for metrics collected in methods called by your entry point. 
+You now of course want this data to be visible as tag for metrics collected in methods called by your entry point. 
 With the implementation above, the request URL would only be visible within the HTTP entry method.
 
 ## Up- & Down-Propagation
@@ -23,14 +24,14 @@ With the implementation above, the request URL would only be visible within the 
 For this reason the _inspectIT context_ implements _data propagation_.
 
 * **Down Propagation:** Data collected in your instrumented method will also be visible to all methods directly 
-  or indirectly called by your method. This behaviour already comes [with the OpenTelemetry Baggage](https://opentelemetry.io/docs/concepts/signals/baggage).
+  or indirectly called by your method. This behaviour already comes [with the OpenCensus Library for tags](https://opencensus.io/tag/#propagation).
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the 
   invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
 
 Up- and down propagation can also be combined. In this case then the data is attached to the control flow, 
 meaning that it will appear as if its value will be passed around with every method call and return.
 
-**Also note, that you should only assign Java Objects into data keys and not native data types, like _boolean_.**
+Also note, that you should only assign Java Objects into data keys and not native data types, like _boolean_.
 
 The second aspect of propagation to consider is the _level_. Does the propagation happen within each thread separately 
 or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro-service 
@@ -49,19 +50,19 @@ inspectit:
   instrumentation:
     data:
       # for correlating calls across JVM borders
-      prop_origin_service: {down-propagation: "GLOBAL"}
-      prop_target_service: {up-propagation: "GLOBAL", down-propagation: "JVM_LOCAL"}
+      'prop_origin_service': {down-propagation: "GLOBAL", is-tag: "false"}
+      'prop_target_service': {up-propagation: "GLOBAL", down-propagation: "JVM_LOCAL", is-tag: "false"}
 
       # we allow the application to be defined at the beginning and to be down propagated from there
-      application: {down-propagation: "GLOBAL"}
+      'application': {down-propagation: "GLOBAL", is-tag: "true"}
 
       # this data will only be visible locally in the method where it is collected
-      http_method: {down-propagation: "NONE"}
-      http_status: {down-propagation: "NONE"}
+      'http_method': {down-propagation: "NONE"}
+      'http_status': {down-propagation: "NONE"}
 
       # this data will be written to the inspectIT session storage
-      database_table: {session-storage: true}
-      browser: {session-storage: true}
+      'database_table': {session-storage: true}
+      'browser': {session-storage: true}
 ```
 
 Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
@@ -69,42 +70,44 @@ The configuration options are the following:
 
 | Config Property                    | Default                                                                                                                                                          | Description                                                                                                                                                                                             |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `down-propagation`                 | `JVM_LOCAL` if the data key is also a [common attribute](metrics/common-attributes.md), `NONE` otherwise                                                         | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
+| `down-propagation`                 | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise                                                                     | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
 | `up-propagation`                   | `NONE`                                                                                                                                                           | Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.     | 
 | `session-storage`                  | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT session storage                                                                                                                                     |
+| `is-tag`                           | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. 
 In this case simply all settings will have their default value.
 
-### Interaction with OpenTelemetry Baggage
+### Interaction with OpenCensus Tags
 
-As explained previously, our _inspectIT context_ can be seen as a more flexible variation of OpenTelemetry baggage. 
-In fact, we designed the _inspectIT context_ so that it acts as a superset of the OpenTelemetry baggage.
+As explained previously, our _inspectIT context_ can be seen as a more flexible variation of OpenCensus tags. 
+In fact, we designed the _inspectIT context_ so that it acts as a superset of the OpenCensus TagContext.
 
-Firstly, when an instrumented method is entered, a new *inspectIT context* is created. 
-At this point, it imports any active baggage by OpenTelemetry directly as data. 
-This also includes the [common attributes](metrics/common-attributes.md) created by inspectIT. This means, that you can simply read (and override) 
-values for common attributes such as `service.name` or `host.name` at any rule.
+Firstly, when an instrumented method is entered, a new i*nspectIT context* is created. 
+At this point, it imports any tag values published by OpenCensus directly as data. 
+This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and override) 
+values for common tags such as `service.name` or `host.name` at any rule.
 
-The integration is even deeper if you configured the agent to also extract data from manual instrumentation 
-in your application via OpenTelemetry. Read the section [OpenTelemetry Configuration](configuration/opentelemetry-configuration.md) for further instructions.
-Firstly, if a method instrumented by inspectIT Ocelot is executed within an opened Baggage by your application,
-these application attributes will also be visible in the _inspectIT context_. Secondly, after the execution of the entry phase 
-of each rule, a new baggage is opened making the attributes written there accessible to metrics collected by your application. 
-If a data key was configured for down propagation, the data from the baggage can also be accessible in the next _inspectIT context_.
+The integration is even deeper if you configured the agent to also extract the metrics from manual instrumentation 
+in your application via OpenCensus.
+Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
+these application tags will also be visible in the _inspectIT context_. Secondly, after the execution of the entry phase 
+of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. 
+Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true 
+will be visible as tags.
 
-## Data Storages
+## Data Tag Storages
 
 Besides the propagation via _inspectIT context_ and special sensors, there are some possibilities
-to exchange data via storages:
+to exchange data via tag storages:
 
 * **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
 * **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
 * **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
 
-## HTTP-Baggage
+## Baggage
 
-As mentioned previously, data attributes can be used across JVM borders when configured for `GLOBAL` propagation.
+As mentioned previously, data tags can be used across JVM borders when configured for `GLOBAL` propagation.
 Then, the data can be read from incoming HTTP headers or can be written into outgoing HTTP headers.
 InspectIT Ocelot will always read or write all globally propagated data via the `baggage` header.
 The header contains a list of key-value pairs in the following format:
@@ -136,7 +139,7 @@ The [inspectIT default instrumentation](https://github.com/inspectIT/inspectit-o
 
 InspectIT Ocelot allows a maximum size of **4 KB** for the `baggage` header.
 If incoming baggage exceeds this limit, inspectIT will not read the header at all.
-If outgoing baggage exceeds this limit, all data attributes exceeding the size limit will be dropped.
+If outgoing baggage exceeds this limit, all data tags exceeding the size limit will be dropped.
 Thus, the outgoing baggage will be incomplete.
 
 ### Browser Security
@@ -164,7 +167,7 @@ How the session ID is determined depends on your particular application and is n
 It is also possible to read the session ID from HTTP headers, which will be explained in more detail below.
 
 The following example shows how to read or write via the session storage. 
-Reading data from the storage - for example for tracing - only works, if the [rule](instrumentation/rules.md) writing the attribute 
+Reading data from the storage - for example for tracing - only works, if the [rule](instrumentation/rules.md) writing the tag 
 has been executed before the reading one. Also note, that both contexts have to use the exact same session ID 
 to access the storage. Otherwise, the contexts will use different storages with different data.
 
@@ -172,8 +175,8 @@ to access the storage. Otherwise, the contexts will use different storages with 
 inspectit:
   instrumentation:
     data:
-      my-attribute:
-        # enable this attribute to be stored for sessions
+      my-tag:
+        # enable this tag to be stored for sessions
         session-storage: true 
         
     rules:
@@ -184,8 +187,8 @@ inspectit:
           remote_session_id: 
             action: a_read_my_session_id
         entry:
-          my-attribute:
-            action: a_set_attribute
+          my-tag:
+            action: a_set_tag
         
       r_read_session:
         # ...
@@ -195,8 +198,8 @@ inspectit:
             action: a_read_my_session_id
         tracing:
           attributes:
-            # use the attribute in the session storage e.g. for tracing
-            attribute: my-attribute
+            # use the tag in the session storage e.g. for tracing
+            tag: my-tag
 
 ```
 
@@ -218,7 +221,7 @@ The method will look for the configured `session-id-header` and will store its v
 data key. The inspectIT [default instrumentation](default-instrumentation/default-instrumentation.md) 
 of the HTTP Servlet already reads the down propagated headers automatically to extract the session ID.
 
-Alternatively, you can always include the session ID into the [baggage](#http-baggage) header by configuring the data key
+Alternatively, you can always include the session ID into the [baggage](#baggage) header by configuring the data key
 `remote_session_id` for `GLOBAL` propagation. However, the context will always prioritize the value of 
 the `session-id-header`, if it can be found. 
 
@@ -226,10 +229,10 @@ the `session-id-header`, if it can be found.
 
 To prevent excessive memory consumption, the maximum amount of active sessions can be configured via the `session-limit` option.
 The session ID itself is restricted to a minimum of 16 characters and a maximum of 512 characters. Otherwise, the session
-cannot be created. One session can store up to 128 data attributes. Inside one session, data keys are restricted to a 
+cannot be created. One session can store up to 128 data tags. Inside one session, data keys are restricted to a 
 maximum of 128 characters and data value are restricted to a maximum of 2048 chars.
 If a date entry does not comply with these size restrictions, the entry will not be stored.
 
-The configuration option `time-to-live` determines, how long each attribute should be stored after it's last update.
-Every 30 seconds all expired data attributes from each session storage will be cleaned up. If a session storage has been empty
+The configuration option `time-to-live` determines, how long each tag should be stored after it's last update.
+Every 30 seconds all expired data tags from each session storage will be cleaned up. If a session storage has been empty
 for at least 60 seconds, the session storage will be removed completely.
