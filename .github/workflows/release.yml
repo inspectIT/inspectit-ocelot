@@ -55,7 +55,7 @@ jobs:
         uses: danipaniii/action-github-changelog-generator@v1.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          sinceTag: ${{ steps.previoustag.outputs.tag }}
+          sinceTag: 2.7.0
           dateFormat:
           maxIssues: 500
           unreleased: false
