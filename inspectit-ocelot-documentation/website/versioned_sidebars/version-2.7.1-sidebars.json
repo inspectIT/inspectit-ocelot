@@ -1,0 +1,77 @@
+{
+  "version-2.7.1-docs": {
+    "Getting Started": [
+      "version-2.7.1-doc1",
+      "version-2.7.1-getting-started/quick-start",
+      "version-2.7.1-getting-started/docker-examples",
+      "version-2.7.1-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-2.7.1-configuration/configuration-sources",
+      "version-2.7.1-configuration/external-configuration-sources",
+      "version-2.7.1-configuration/logging-configuration",
+      "version-2.7.1-configuration/start-configuration",
+      "version-2.7.1-configuration/opentelemetry-configuration",
+      "version-2.7.1-configuration/plugin-configuration",
+      "version-2.7.1-configuration/agent-command-configuration"
+    ],
+    "Metrics": [
+      "version-2.7.1-metrics/metrics",
+      "version-2.7.1-metrics/metric-recorders",
+      "version-2.7.1-metrics/metric-exporters",
+      "version-2.7.1-metrics/common-tags",
+      "version-2.7.1-metrics/custom-metrics",
+      "version-2.7.1-metrics/self-monitoring",
+      "version-2.7.1-metrics/tag-guard"
+    ],
+    "Tracing": [
+      "version-2.7.1-tracing/tracing",
+      "version-2.7.1-tracing/trace-exporters",
+      "version-2.7.1-tracing/log-correlation",
+      "version-2.7.1-tracing/privacy",
+      "version-2.7.1-tracing/tracing-self-monitoring"
+    ],
+    "Instrumentation": [
+      "version-2.7.1-instrumentation/instrumentation",
+      "version-2.7.1-instrumentation/scopes",
+      "version-2.7.1-instrumentation/actions",
+      "version-2.7.1-instrumentation/rules",
+      "version-2.7.1-instrumentation/data-propagation",
+      "version-2.7.1-instrumentation/metrics",
+      "version-2.7.1-instrumentation/tracing",
+      "version-2.7.1-instrumentation/business-transactions",
+      "version-2.7.1-instrumentation/code-style",
+      "version-2.7.1-instrumentation/special-sensors",
+      "version-2.7.1-instrumentation/process"
+    ],
+    "Default Instrumentation": [
+      "version-2.7.1-default-instrumentation/default-instrumentation",
+      "version-2.7.1-default-instrumentation/jakarta",
+      "version-2.7.1-default-instrumentation/apache-client5"
+    ],
+    "End User Monitoring": [
+      "version-2.7.1-enduser-monitoring/enduser-monitoring-server",
+      "version-2.7.1-enduser-monitoring/eum-server-setup",
+      "version-2.7.1-enduser-monitoring/eum-server-configuration",
+      "version-2.7.1-enduser-monitoring/install-eum-agent"
+    ],
+    "Configuration Server": [
+      "version-2.7.1-config-server/overview",
+      "version-2.7.1-config-server/cs-configuration",
+      "version-2.7.1-config-server/managing-files",
+      "version-2.7.1-config-server/files-staging",
+      "version-2.7.1-config-server/agent-mappings",
+      "version-2.7.1-config-server/scope-wizard",
+      "version-2.7.1-config-server/class-browser",
+      "version-2.7.1-config-server/user-authentication",
+      "version-2.7.1-config-server/config-docs",
+      "version-2.7.1-config-server/log-config",
+      "version-2.7.1-config-server/yaml-editor",
+      "version-2.7.1-config-server/status-table-view",
+      "version-2.7.1-config-server/alerting"
+    ],
+    "Breaking Changes": [
+      "version-2.7.1-breaking-changes/Breaking Changes"
+    ]
+  }
+}
