@@ -9,7 +9,7 @@ jobs:
   security-check:
     name: Security Check Configuration-Server
     runs-on: ubuntu-latest
-    container: eclipse-temurin:21
+    container: eclipse-temurin:25
     steps:
       - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
