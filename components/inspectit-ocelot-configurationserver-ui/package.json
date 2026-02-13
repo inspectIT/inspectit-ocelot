@@ -56,7 +56,7 @@
     "redux-thunk": "^2.4.1",
     "require-from-string": "2.0.2",
     "reselect": "^5.1.1",
-    "strip-ansi": "^7.0.1",
+    "strip-ansi": "^7.1.2",
     "uuid": "^11.1.0",
     "webpack": "^5.101.0"
   },
